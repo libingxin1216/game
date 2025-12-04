@@ -204,6 +204,7 @@ MonoBehaviour:
   connectedWaypoints:
   - {fileID: 2024638577}
   - {fileID: 1134084878}
+  - {fileID: 126003455}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!4 &158745844 stripped
@@ -482,6 +483,7 @@ MonoBehaviour:
   connectedWaypoints:
   - {fileID: 158745843}
   - {fileID: 1134084878}
+  - {fileID: 126003455}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!1 &2049007987
