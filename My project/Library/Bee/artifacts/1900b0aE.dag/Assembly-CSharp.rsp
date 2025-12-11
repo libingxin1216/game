@@ -376,6 +376,7 @@
 "Assets/script/Fight/CardAnimation.cs"
 "Assets/script/Fight/CardButtonHandler.cs"
 "Assets/script/Fight/CardGameManager.cs"
+"Assets/script/Fight/EnemyTargetButtonVisual.cs"
 "Assets/script/LineNetworkManager.cs"
 "Assets/script/PlayerMovement.cs"
 "Assets/script/Waypoint.cs"
