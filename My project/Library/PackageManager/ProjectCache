@@ -5,15 +5,15 @@ m_ProjectFiles:
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 639006385369635490
-    m_Hash: 3609480205
+      ticks: 639004279570422527
+    m_Hash: 117411764
   m_LockFileStatus:
     m_FilePath: D:/game/My project/Packages/packages-lock.json
     m_PathExists: 1
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 639009772537764047
+      ticks: 639004279570433726
     m_Hash: 1278621782
 m_EmbeddedPackageManifests:
   m_ManifestsStatus: {}
@@ -129,6 +129,7 @@ m_ResolvedPackages:
     - 2.10.0
     - 2.10.1
     - 2.10.2
+    - 2.11.2
     compatible:
     - 2.7.1
     - 2.8.1
@@ -139,6 +140,7 @@ m_ResolvedPackages:
     - 2.10.0
     - 2.10.1
     - 2.10.2
+    - 2.11.2
     recommended: 2.7.1
     deprecated: []
   dependencies: []
@@ -463,11 +465,13 @@ m_ResolvedPackages:
     - 2.0.22
     - 2.0.23
     - 2.0.25
+    - 2.0.26
     compatible:
     - 2.0.22
     - 2.0.23
     - 2.0.25
-    recommended: 2.0.25
+    - 2.0.26
+    recommended: 2.0.26
     deprecated: []
   dependencies:
   - name: com.unity.test-framework
@@ -964,6 +968,7 @@ m_ResolvedPackages:
     - 1.8.7
     - 1.8.8
     - 1.8.9
+    - 1.8.10
     compatible:
     - 1.7.7
     - 1.8.0
@@ -976,6 +981,7 @@ m_ResolvedPackages:
     - 1.8.7
     - 1.8.8
     - 1.8.9
+    - 1.8.10
     recommended: 1.7.7
     deprecated: []
   dependencies:
@@ -4899,6 +4905,7 @@ m_ResolvedPackages:
     - 1.8.24
     - 1.8.25
     - 1.8.26
+    - 1.8.27
     compatible:
     - 1.8.21
     - 1.8.22
@@ -4906,7 +4913,8 @@ m_ResolvedPackages:
     - 1.8.24
     - 1.8.25
     - 1.8.26
-    recommended: 1.8.26
+    - 1.8.27
+    recommended: 1.8.27
     deprecated: []
   dependencies:
   - name: com.unity.mathematics
