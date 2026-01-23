@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/plot player.unity
+- path: Assets/Scenes/CharacterLibrary.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0
