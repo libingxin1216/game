@@ -26,6 +26,10 @@ public class CharacterBattleUI : MonoBehaviour, IPointerClickHandler // 添加接口
     [SerializeField] private Color targetSelectableColor = Color.red;
     [SerializeField] private Color targetSelectedColor = Color.green;
 
+    [Header("状态显示")]
+    public Transform statusEffectsContainer;
+    public GameObject statusEffectIconPrefab;
+
     // 私有字段
     [SerializeField] private CharacterData _characterData;
     private bool isPlayer;
@@ -131,6 +135,47 @@ public class CharacterBattleUI : MonoBehaviour, IPointerClickHandler // 添加接口
                 if (selectButton != null)
                     selectButton.interactable = true;
             }
+        }
+    }
+
+    // 更新状态显示
+    public void UpdateStatusEffects()
+    {
+        if (CharacterData == null) return;
+
+        // 清空现有状态图标
+        foreach (Transform child in statusEffectsContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        // 显示所有状态
+        foreach (var status in CharacterData.statusEffects)
+        {
+            if (status.stacks <= 0) continue;
+
+            GameObject iconObj = Instantiate(statusEffectIconPrefab, statusEffectsContainer);
+            Image iconImage = iconObj.GetComponent<Image>();
+            Text stackText = iconObj.GetComponentInChildren<Text>();
+
+            if (iconImage != null && StatusEffectManager.Instance != null)
+            {
+                iconImage.sprite = StatusEffectManager.Instance.GetStatusIcon(status.type);
+                iconImage.color = StatusEffectManager.Instance.GetStatusColor(status.type);
+            }
+
+            if (stackText != null)
+            {
+                stackText.text = status.stacks.ToString();
+            }
+
+            // 添加悬停提示
+            StatusIconTooltip tooltip = iconObj.GetComponent<StatusIconTooltip>();
+            if (tooltip == null)
+            {
+                tooltip = iconObj.AddComponent<StatusIconTooltip>();
+            }
+            tooltip.statusType = status.type;
         }
     }
 

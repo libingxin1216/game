@@ -25,6 +25,9 @@ public class CharacterData
     public List<StatusEffect> statusEffects = new List<StatusEffect>();
     public int shield = 0;
 
+    // 临时效果字典
+    public Dictionary<string, object> temporaryEffects = new Dictionary<string, object>();
+
     // 构造函数
     public CharacterData(string id, string name, string desc, CharacterClass charClass, Color color)
     {
@@ -45,6 +48,89 @@ public class CharacterData
         battleDeck = new List<CardData>();
         discardPile = new List<CardData>();
         statusEffects = new List<StatusEffect>();
+        temporaryEffects = new Dictionary<string, object>();
+    }
+
+    // 添加临时效果
+    public void AddTemporaryEffect(string effectName, object value = null)
+    {
+        temporaryEffects[effectName] = value ?? true;
+    }
+
+    // 检查是否有临时效果
+    public bool HasTemporaryEffect(string effectName)
+    {
+        return temporaryEffects.ContainsKey(effectName);
+    }
+
+    // 移除临时效果
+    public void RemoveTemporaryEffect(string effectName)
+    {
+        temporaryEffects.Remove(effectName);
+    }
+
+    // 触发状态效果
+    public void TriggerStatusEffect(StatusType statusType)
+    {
+        StatusEffect status = statusEffects.Find(s => s.type == statusType);
+        if (status != null && status.stacks > 0)
+        {
+            // 触发腐烂效果
+            if (statusType == StatusType.Rot)
+            {
+                // 腐烂：回合开始前造成伤害，无视护盾
+                TakeDamage(status.stacks, true);
+                Debug.Log($"{characterName} 触发 {status.stacks} 层腐烂，受到 {status.stacks} 点伤害");
+            }
+        }
+    }
+
+    // 处理回合开始时的状态效果
+    public void ProcessTurnStartStatus()
+    {
+        // 触发腐烂效果
+        TriggerStatusEffect(StatusType.Rot);
+
+        // 减少状态持续时间
+        for (int i = statusEffects.Count - 1; i >= 0; i--)
+        {
+            StatusEffect status = statusEffects[i];
+
+            if (status.duration > 0)
+            {
+                status.duration--;
+                if (status.duration == 0)
+                {
+                    // 持续时间结束，移除状态
+                    statusEffects.RemoveAt(i);
+                    Debug.Log($"{characterName} 的 {GetStatusName(status.type)} 状态结束");
+                }
+            }
+        }
+
+        // 清空临时效果
+        temporaryEffects.Clear();
+    }
+
+    // 处理回合结束时的状态效果
+    public void ProcessTurnEndStatus()
+    {
+        // 每回合清空护盾
+        shield = 0;
+
+        Debug.Log($"{characterName} 回合结束，护盾清空");
+    }
+
+    string GetStatusName(StatusType status)
+    {
+        switch (status)
+        {
+            case StatusType.Rot: return "腐烂";
+            case StatusType.Strong: return "强壮";
+            case StatusType.Weak: return "衰弱";
+            case StatusType.Shield: return "护盾";
+            default: return "未知";
+        }
     }
 
     // 初始化方法
@@ -135,9 +221,25 @@ public class CharacterData
     }
 
     // 添加状态
-    public void AddStatus(StatusEffect status)
+    // 在 CharacterData.cs 中添加这个方法：
+    public void AddStatus(StatusType statusType, int stacks = 1, int duration = -1)
     {
-        statusEffects.Add(status);
+        StatusEffect existing = statusEffects.Find(s => s.type == statusType);
+        if (existing != null)
+        {
+            // 叠加层数
+            existing.stacks += stacks;
+            if (duration > 0 && existing.duration > 0)
+            {
+                existing.duration = Mathf.Max(existing.duration, duration);
+            }
+        }
+        else
+        {
+            // 创建新状态
+            StatusEffect newStatus = new StatusEffect(statusType, stacks, duration);
+            statusEffects.Add(newStatus);
+        }
     }
 
     // 获取攻击加成/减益
@@ -161,8 +263,3 @@ public class CharacterData
         return modifier;
     }
 }
-
-
-
-
-
