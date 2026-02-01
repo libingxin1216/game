@@ -510,6 +510,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 432960242}
   m_CullTransparentMesh: 1
+--- !u!1 &527898606
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 527898608}
+  - component: {fileID: 527898607}
+  m_Layer: 0
+  m_Name: BattleAI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &527898607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 527898606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 682e8269b43c98346892b23ea5d74c5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &527898608
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 527898606}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 719.9903, y: 668.4255, z: -3.1591618}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &532883162
 GameObject:
   m_ObjectHideFlags: 0
@@ -657,7 +701,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1841916938912869232, guid: a4798e2f164a7f249b2f307dd8959214, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1403547898}
   m_SourcePrefab: {fileID: 100100000, guid: a4798e2f164a7f249b2f307dd8959214, type: 3}
 --- !u!1 &837634848
 GameObject:
@@ -882,6 +929,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 839380824}
   m_CullTransparentMesh: 1
+--- !u!1 &950611363
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 950611365}
+  - component: {fileID: 950611364}
+  m_Layer: 0
+  m_Name: CardEffectExecutor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &950611364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950611363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 870dd6811ffa29347a81de78197a5169, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damageEffectPrefab: {fileID: 3411416894061968016, guid: 596bea7367ecf58438b53d47f428cf66, type: 3}
+  healEffectPrefab: {fileID: 0}
+  shieldEffectPrefab: {fileID: 0}
+  statusEffectPrefab: {fileID: 0}
+--- !u!4 &950611365
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950611363}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 370.9739, y: 1014.2856, z: 2.2058697}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1198386395
 GameObject:
   m_ObjectHideFlags: 0
@@ -1171,6 +1266,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1384050808}
   m_CullTransparentMesh: 1
+--- !u!1 &1403547894 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1841916938912869232, guid: a4798e2f164a7f249b2f307dd8959214, type: 3}
+  m_PrefabInstance: {fileID: 821671450}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1403547898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1403547894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf00b988b8090814a936168b8b72f1b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotIcon: {fileID: 0}
+  strongIcon: {fileID: 0}
+  weakIcon: {fileID: 0}
+  shieldIcon: {fileID: 0}
+  rotColor: {r: 0.5, g: 0.2, b: 0.5, a: 1}
+  strongColor: {r: 1, g: 0, b: 0, a: 1}
+  weakColor: {r: 0, g: 0, b: 1, a: 1}
+  shieldColor: {r: 0, g: 1, b: 1, a: 1}
 --- !u!1001 &1524254945
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1774,3 +1894,5 @@ SceneRoots:
   - {fileID: 1772704463}
   - {fileID: 2014366300}
   - {fileID: 821671450}
+  - {fileID: 950611365}
+  - {fileID: 527898608}
