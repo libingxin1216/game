@@ -18,162 +18,121 @@ public class BattleAI : MonoBehaviour
         }
     }
 
-    // Ö´ĞĞµĞÈË»ØºÏ
+    // æ‰§è¡Œæ•Œæ–¹å›åˆæ€»æµç¨‹
     public IEnumerator ExecuteEnemyTurn(BattleData battleData)
     {
-        Debug.Log("=== µĞÈËAI»ØºÏ¿ªÊ¼ ===");
+        Debug.Log("=== æ•ŒäººAIå›åˆå¼€å§‹ ===");
+        if (BattleManager.Instance != null && BattleManager.Instance.endTurnButton != null)
+        {
+            BattleManager.Instance.endTurnButton.interactable = false; // AIè¡ŒåŠ¨æ—¶ï¼Œç¦æ­¢ç©å®¶æ“ä½œ
+        }
 
-        yield return new WaitForSeconds(1f);
-
-        // ÎªÃ¿¸öµĞÈË½ÇÉ«Ö´ĞĞĞĞ¶¯
+        // ä¾æ¬¡ä¸ºæ¯ä¸ªå­˜æ´»çš„æ•Œäººæ‰§è¡Œè¡ŒåŠ¨
         foreach (var enemy in battleData.enemyTeam)
         {
             if (enemy.isDead) continue;
-
-            yield return ExecuteEnemyActions(enemy, battleData);
-            yield return new WaitForSeconds(1f);
+            yield return StartCoroutine(ExecuteSingleEnemyTurn(enemy, battleData));
         }
 
-        Debug.Log("=== µĞÈËAI»ØºÏ½áÊø ===");
+        Debug.Log("=== æ•ŒäººAIå›åˆç»“æŸ ===");
+        yield return new WaitForSeconds(1f); // å›åˆç»“æŸå‰çš„çŸ­æš‚æš‚åœ
+
+        if (BattleManager.Instance != null)
+        {
+            BattleManager.Instance.EndEnemyTurn(); // åˆ‡æ¢å›ç©å®¶å›åˆ
+        }
     }
 
-    // Ö´ĞĞµ¥¸öµĞÈËµÄĞĞ¶¯
-    IEnumerator ExecuteEnemyActions(CharacterData enemy, BattleData battleData)
+    // æ‰§è¡Œå•ä¸ªæ•Œäººçš„å›åˆï¼Œæ¨¡æ‹Ÿç©å®¶æ“ä½œ
+    private IEnumerator ExecuteSingleEnemyTurn(CharacterData enemy, BattleData battleData)
     {
-        Debug.Log($"µĞÈËAI: {enemy.characterName} ¿ªÊ¼ĞĞ¶¯");
+        Debug.Log($"AI: {enemy.characterName} å¼€å§‹è¡ŒåŠ¨...");
 
-        // 1. ÎªµĞÈË·ÅÖÃ¿¨ÅÆ
-        yield return PlaceEnemyCards(enemy, battleData);
+        // 1. æ¨¡æ‹Ÿæ€è€ƒæ—¶é—´
+        float thinkingTime = Random.Range(1.5f, 2.5f);
+        Debug.Log($"AI: {enemy.characterName} æ€è€ƒä¸­... ({thinkingTime:F1}s)");
+        yield return new WaitForSeconds(thinkingTime);
 
-        // 2. Ñ¡ÔñÄ¿±ê
-        yield return SelectEnemyTarget(enemy, battleData);
+        // 2. å†³ç­–ï¼šé€‰æ‹©è¦å‡ºçš„ç‰Œå’Œç›®æ ‡
+        CardData cardToPlay = DecideCardToPlay(enemy);
+        CharacterData target = DecideTarget(enemy, battleData);
 
-        // 3. Ö´ĞĞ¿¨ÅÆĞ§¹û
-        yield return ExecuteEnemyCardEffects(enemy, battleData);
-
-        Debug.Log($"µĞÈËAI: {enemy.characterName} ĞĞ¶¯Íê³É");
+        // 3. æ‰§è¡Œè¡ŒåŠ¨
+        if (cardToPlay != null && target != null)
+        {
+            Debug.Log($"AI: {enemy.characterName} å†³å®šå¯¹ {target.characterName} ä½¿ç”¨ {cardToPlay.cardName}.");
+            yield return StartCoroutine(PlayCardSequence(enemy, cardToPlay, target, battleData));
+        }
+        else
+        {
+            Debug.Log($"AI: {enemy.characterName} æ²¡æœ‰å¯æ‰§è¡Œçš„è¡ŒåŠ¨ï¼Œè·³è¿‡å›åˆã€‚");
+            yield return new WaitForSeconds(2f); // æ— æ“ä½œä¹Ÿè¦æœ‰åœé¡¿
+        }
     }
 
-    // ÎªµĞÈË·ÅÖÃ¿¨ÅÆ
-    IEnumerator PlaceEnemyCards(CharacterData enemy, BattleData battleData)
+    // AIå†³ç­–ï¼šå†³å®šè¦å‡ºçš„ç‰Œ
+    private CardData DecideCardToPlay(CharacterData enemy)
+    {
+        if (enemy.handCards.Count == 0) return null;
+
+        // ç®€å•ç­–ç•¥ï¼šä¼˜å…ˆå‡ºæ”»å‡»ç‰Œ
+        foreach (var card in enemy.handCards)
+        {
+            if (card.cardType == CardType.Attack)
+            {
+                return card;
+            }
+        }
+        // æ²¡æœ‰æ”»å‡»ç‰Œï¼Œå°±å‡ºç¬¬ä¸€å¼ 
+        return enemy.handCards[0];
+    }
+
+    // AIå†³ç­–ï¼šå†³å®šç›®æ ‡
+    private CharacterData DecideTarget(CharacterData enemy, BattleData battleData)
+    {
+        // ç®€å•ç­–ç•¥ï¼šæ”»å‡»è¡€é‡ç™¾åˆ†æ¯”æœ€ä½çš„ç©å®¶
+        return GetWeakestPlayer(battleData);
+    }
+
+    // æ¨¡æ‹Ÿç©å®¶ç©ä¸€å¼ ç‰Œçš„å®Œæ•´æµç¨‹
+    private IEnumerator PlayCardSequence(CharacterData enemy, CardData card, CharacterData target, BattleData battleData)
     {
         if (!battleData.characterSlots.TryGetValue(enemy, out var slots)) yield break;
 
-        // Çå¿ÕÖ®Ç°µÄ¿¨ÅÆ
+        // æµç¨‹1: æ¸…ç©ºæ—§å¡æ§½
         slots.ClearSlots();
 
-        // ´ÓÊÖÅÆÖĞÑ¡Ôñ¿¨ÅÆ·ÅÖÃ£¨¼òµ¥AI£ºËæ»úÑ¡Ôñ£©
-        for (int i = 0; i < 3; i++)
+        // æµç¨‹2: æ”¾ç½®å¡ç‰Œ
+        Debug.Log($"AI: {enemy.characterName} æ­£åœ¨æ”¾ç½®å¡ç‰Œ {card.cardName}...");
+        slots.slots[0] = card; // ç®€å•èµ·è§ï¼Œæ€»æ˜¯æ”¾åœ¨ç¬¬ä¸€ä¸ªæ§½ä½
+        enemy.handCards.Remove(card);
+        // æ­¤å¤„å¯ä»¥è§¦å‘å¡ç‰Œæ”¾ç½®çš„UIåŠ¨ç”»
+        yield return new WaitForSeconds(1.5f);
+
+        // æµç¨‹3: é€‰æ‹©ç›®æ ‡
+        Debug.Log($"AI: {enemy.characterName} æ­£åœ¨é€‰æ‹©ç›®æ ‡ {target.characterName}...");
+        slots.target = target;
+        // æ­¤å¤„å¯ä»¥è§¦å‘ç›®æ ‡é«˜äº®çš„UIåŠ¨ç”»
+        yield return new WaitForSeconds(1.5f);
+
+        // æµç¨‹4: æ‰§è¡Œå¡ç‰Œæ•ˆæœ
+        Debug.Log($"AI: {enemy.characterName} å¯¹ {target.characterName} å‘åŠ¨ {card.cardName} çš„æ•ˆæœ!");
+        if (CardEffectExecutor.Instance != null)
         {
-            if (enemy.handCards.Count > 0)
-            {
-                // Ëæ»úÑ¡ÔñÒ»ÕÅ¿¨ÅÆ
-                int randomIndex = Random.Range(0, enemy.handCards.Count);
-                CardData selectedCard = enemy.handCards[randomIndex];
-
-                // ·ÅÖÃµ½¿¨²Û
-                slots.slots[i] = selectedCard;
-
-                // ´ÓÊÖÅÆÒÆ³ı
-                enemy.handCards.RemoveAt(randomIndex);
-
-                Debug.Log($"µĞÈËAI: {enemy.characterName} ·ÅÖÃ¿¨ÅÆ {selectedCard.cardName} µ½¿¨²Û {i}");
-
-                yield return new WaitForSeconds(0.3f);
-            }
+            yield return CardEffectExecutor.Instance.ExecuteCardEffects(card, enemy, target, battleData);
         }
+        yield return new WaitForSeconds(2.0f); // ç­‰å¾…å¡ç‰Œæ•ˆæœåŠ¨ç”»å’Œç»“ç®—
+
+        // æµç¨‹5: æ¸…ç†
+        slots.ClearSlots();
+        Debug.Log($"AI: {enemy.characterName} çš„è¡ŒåŠ¨å®Œæˆã€‚");
     }
 
-    // Ñ¡ÔñµĞÈËÄ¿±ê
-    IEnumerator SelectEnemyTarget(CharacterData enemy, BattleData battleData)
-    {
-        if (!battleData.characterSlots.TryGetValue(enemy, out var slots)) yield break;
-
-        // Ñ¡ÔñÄ¿±ê£¨¼òµ¥AI£ºËæ»úÑ¡Ôñ´æ»îÍæ¼Ò£©
-        List<CharacterData> alivePlayers = new List<CharacterData>();
-        foreach (var player in battleData.playerTeam)
-        {
-            if (!player.isDead)
-            {
-                alivePlayers.Add(player);
-            }
-        }
-
-        if (alivePlayers.Count > 0)
-        {
-            int randomIndex = Random.Range(0, alivePlayers.Count);
-            slots.target = alivePlayers[randomIndex];
-
-            Debug.Log($"µĞÈËAI: {enemy.characterName} Ñ¡ÔñÄ¿±ê {slots.target.characterName}");
-        }
-
-        yield return new WaitForSeconds(0.3f);
-    }
-
-    // Ö´ĞĞµĞÈË¿¨ÅÆĞ§¹û
-    IEnumerator ExecuteEnemyCardEffects(CharacterData enemy, BattleData battleData)
-    {
-        if (!battleData.characterSlots.TryGetValue(enemy, out var slots)) yield break;
-        if (slots.target == null) yield break;
-
-        Debug.Log($"µĞÈËAI: {enemy.characterName} Ö´ĞĞ¿¨ÅÆĞ§¹û£¬Ä¿±ê: {slots.target.characterName}");
-
-        // Ö´ĞĞÃ¿¸ö¿¨²ÛµÄ¿¨ÅÆĞ§¹û
-        for (int i = 0; i < 3; i++)
-        {
-            if (slots.slots[i] != null)
-            {
-                Debug.Log($"µĞÈËAI: Ö´ĞĞ¿¨ÅÆ {slots.slots[i].cardName}");
-
-                // Ê¹ÓÃĞ§¹ûÖ´ĞĞÆ÷
-                if (CardEffectExecutor.Instance != null)
-                {
-                    yield return CardEffectExecutor.Instance.ExecuteCardEffects(
-                        slots.slots[i], enemy, slots.target, battleData
-                    );
-                }
-
-                yield return new WaitForSeconds(0.5f);
-            }
-        }
-    }
-
-    // ÖÇÄÜAI°æ±¾£¨¿ÉÑ¡£©
-    IEnumerator ExecuteSmartEnemyActions(CharacterData enemy, BattleData battleData)
-    {
-        // 1. ·ÖÎö¾ÖÊÆ
-        CharacterData weakestPlayer = GetWeakestPlayer(battleData);
-        CharacterData strongestPlayer = GetStrongestPlayer(battleData);
-
-        // 2. ¸ù¾İ½ÇÉ«ÀàĞÍÑ¡Ôñ²ßÂÔ
-        switch (enemy.characterClass)
-        {
-            case CharacterClass.Beelzebub:
-                // ±ğÎ÷²·£ºÓÅÏÈ¸øµÍÑªÁ¿Ä¿±êÉÏ¸¯ÀÃ
-                yield return ExecuteBeelzebubStrategy(enemy, weakestPlayer, battleData);
-                break;
-
-            case CharacterClass.Mammon:
-                // ÂêÃÅ£ºÖÎÁÆ×Ô¼º£¬¹¥»÷µĞÈË
-                yield return ExecuteMammonStrategy(enemy, strongestPlayer, battleData);
-                break;
-
-            case CharacterClass.Asmodeus:
-                // °¢Ë¹ÃÉµÙË¹£º¸øµĞÈËÉÏË¥Èõ£¬¸øÓÑ¾ü¼ÓÇ¿×³
-                yield return ExecuteAsmodeusStrategy(enemy, battleData);
-                break;
-
-            default:
-                // Ä¬ÈÏ²ßÂÔ
-                yield return ExecuteDefaultStrategy(enemy, battleData);
-                break;
-        }
-    }
-
-    CharacterData GetWeakestPlayer(BattleData battleData)
+    // è·å–è¡€é‡ç™¾åˆ†æ¯”æœ€ä½çš„ç©å®¶
+    private CharacterData GetWeakestPlayer(BattleData battleData)
     {
         CharacterData weakest = null;
-        float lowestHealthPercent = 1f;
+        float lowestHealthPercent = float.MaxValue;
 
         foreach (var player in battleData.playerTeam)
         {
@@ -186,68 +145,6 @@ public class BattleAI : MonoBehaviour
                 weakest = player;
             }
         }
-
         return weakest;
-    }
-
-    CharacterData GetStrongestPlayer(BattleData battleData)
-    {
-        CharacterData strongest = null;
-        float highestDamagePotential = 0f;
-
-        foreach (var player in battleData.playerTeam)
-        {
-            if (player.isDead) continue;
-
-            // ¼òµ¥ÆÀ¹À£ºÉúÃüÖµÔ½¸ßÔ½Ç¿
-            float strength = player.currentHealth;
-            if (strength > highestDamagePotential)
-            {
-                highestDamagePotential = strength;
-                strongest = player;
-            }
-        }
-
-        return strongest;
-    }
-
-    // ¸÷¸ö½ÇÉ«µÄ²ßÂÔ
-    IEnumerator ExecuteBeelzebubStrategy(CharacterData enemy, CharacterData target, BattleData battleData)
-    {
-        // ±ğÎ÷²·²ßÂÔ£º¸øÄ¿±êÉÏ¸¯ÀÃ£¬Ê¹ÓÃAOE¼¼ÄÜ
-        Debug.Log($"±ğÎ÷²·AI: ÓÅÏÈ¹¥»÷×îÈõÄ¿±ê {target?.characterName}");
-
-        // ÕâÀï¿ÉÒÔÌí¼Ó¾ßÌåµÄ¿¨ÅÆÑ¡ÔñÂß¼­
-        yield break;
-    }
-
-    IEnumerator ExecuteMammonStrategy(CharacterData enemy, CharacterData target, BattleData battleData)
-    {
-        // ÂêÃÅ²ßÂÔ£ºÏÈÖÎÁÆ×Ô¼º£¬ÔÙ¹¥»÷
-        Debug.Log($"ÂêÃÅAI: ÖÎÁÆ×Ô¼º£¬¹¥»÷×îÇ¿Ä¿±ê {target?.characterName}");
-
-        // ¼ì²éÊÇ·ñĞèÒªÖÎÁÆ
-        float healthPercent = (float)enemy.currentHealth / enemy.maxHealth;
-        if (healthPercent < 0.5f)
-        {
-            // ÓÅÏÈÊ¹ÓÃÖÎÁÆ¿¨ÅÆ
-            Debug.Log("ÂêÃÅAI: ÉúÃüÖµµÍ£¬ÓÅÏÈÖÎÁÆ");
-        }
-
-        yield break;
-    }
-
-    IEnumerator ExecuteAsmodeusStrategy(CharacterData enemy, BattleData battleData)
-    {
-        // °¢Ë¹ÃÉµÙË¹²ßÂÔ£º¸øµĞÈËÉÏË¥Èõ£¬¸øÓÑ¾ü¼ÓÇ¿×³
-        Debug.Log("°¢Ë¹ÃÉµÙË¹AI: Ê¹ÓÃÔöÒæ/¼õÒæ¼¼ÄÜ");
-        yield break;
-    }
-
-    IEnumerator ExecuteDefaultStrategy(CharacterData enemy, BattleData battleData)
-    {
-        // Ä¬ÈÏ²ßÂÔ£ºËæ»úÑ¡Ôñ
-        Debug.Log("Í¨ÓÃAI: Ê¹ÓÃËæ»ú²ßÂÔ");
-        yield break;
     }
 }

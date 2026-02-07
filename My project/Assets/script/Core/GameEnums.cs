@@ -1,5 +1,5 @@
-// 确保这些枚举是全局可访问的
+// 确锟斤拷锟斤拷些枚锟斤拷锟斤拷全锟街可凤拷锟绞碉拷
 public enum CharacterClass { Universal, Beelzebub, Mammon, Asmodeus }
 public enum CardType { Attack, Defense, Heal, Status, Buff, Special }
-public enum TargetType { Self, SingleEnemy, AllEnemies, SingleAlly, AllAllies, Random }
+public enum TargetType { None, Self, SingleEnemy, AllEnemies, SingleAlly, AllAllies, Random }
 public enum StatusType { None, Rot, Strong, Weak, Shield }

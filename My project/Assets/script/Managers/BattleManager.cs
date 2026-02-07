@@ -8,30 +8,126 @@ public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance { get; private set; }
 
-    [Header("Õ½¶·Êı¾İ")]
+    [Header("æˆ˜æ–—æ•°æ®")]
     public BattleData battleData;
 
-    [Header("UIÒıÓÃ")]
+    [Header("UIå…ƒç´ ")]
     public Transform playerSideContainer;
     public Transform enemySideContainer;
     public Transform handCardContainer;
     public GameObject characterSlotPrefab;
     public GameObject battleCardPrefab;
     public Button nextTurnButton;
+    public Button endTurnButton; // æ·»åŠ æ­¤è¡Œ
     public Text turnText;
+    public CardConsumptionUI cardConsumptionUI;
 
-    [Header("¿¨ÅÆÑ¡ÔñÏµÍ³")]
+    [Header("æˆ˜æ–—ç»“æœUI")]
+    public GameObject victoryPanel;
+    public GameObject defeatPanel;
+
+    [Header("å¡ç‰Œé€‰æ‹©ç³»ç»Ÿ")]
     public GameObject cardSelectionPanelPrefab;
 
-    [Header("µ±Ç°Ñ¡ÖĞµÄ½ÇÉ«")]
+    [Header("å½“å‰é€‰ä¸­çš„è§’è‰²")]
     public CharacterData currentSelectedCharacter;
 
-    [Header("Ä¿±êÑ¡Ôñ×´Ì¬")]
-    public CharacterData currentSelectingCharacter; // µ±Ç°ÕıÔÚÑ¡ÔñÄ¿±êµÄ½ÇÉ«
-    public bool isSelectingTarget = false; // ÊÇ·ñÕıÔÚÑ¡ÔñÄ¿±ê
+    [Header("ç›®æ ‡é€‰æ‹©çŠ¶æ€")]
+    public CharacterData currentSelectingCharacter; // å½“å‰æ­£åœ¨é€‰æ‹©ç›®æ ‡çš„è§’è‰²
+    public bool isSelectingTarget = false;
+
+    [Header("å¡ç‰Œä¸¢å¼ƒæ¨¡å¼çŠ¶æ€")]
+    public bool isDiscardMode = false;
+    private CardData cardToPlay;
+    private CharacterData discardTargetCharacter;
+    private int discardSlotIndex;
+    private int requiredDiscardCount;
+    private CardType requiredCardType;
+    private List<CardData> cardsToDiscard = new List<CardData>();
+
+    [Header("èƒŒæ™¯å˜æš—")]
+    [SerializeField] private Image backgroundDimmer;
+
+    public bool IsInDiscardMode => isDiscardMode;
+
+    // å­˜å‚¨æ¯ä¸ªè§’è‰²çš„UI
+    private Dictionary<CharacterData, CharacterBattleUI> characterUIs = new Dictionary<CharacterData, CharacterBattleUI>();
+
+    // å­˜å‚¨æ¯ä¸ªè§’è‰²çš„ç›®æ ‡
+    private Dictionary<CharacterData, CharacterData> characterTargets = new Dictionary<CharacterData, CharacterData>();
+
+    // å…¬å…±æ–¹æ³•ï¼Œç”¨äºå¤–éƒ¨æ£€æŸ¥æ˜¯å¦åœ¨é€‰æ‹©ç›®æ ‡
+    public bool IsSelectingTarget()
+    {
+        return isSelectingTarget;
+    }
+
+    // å½“è§’è‰²è¢«ç‚¹å‡»ä½œä¸ºç›®æ ‡æ—¶è°ƒç”¨
+    public void OnCharacterClickedAsTarget(CharacterData targetCharacter)
+    {
+        if (isSelectingTarget)
+        {
+            SelectTarget(targetCharacter);
+        }
+    }
+
+    // é€‰æ‹©ç›®æ ‡
+    public void SelectTarget(CharacterData target)
+    {
+        if (!isSelectingTarget)
+        {
+            Debug.LogWarning("ä¸åœ¨ç›®æ ‡é€‰æ‹©æ¨¡å¼ä¸‹ï¼Œæ— æ³•é€‰æ‹©ç›®æ ‡");
+            return;
+        }
+
+        Debug.Log($"ä¸ºè§’è‰² {currentSelectingCharacter.characterName} é€‰æ‹©äº†ç›®æ ‡: {target.characterName}");
+
+        // åœ¨è¿™é‡Œå¤„ç†å¡ç‰Œæ•ˆæœ
+        // ...
+
+        // é‡ç½®ç›®æ ‡é€‰æ‹©çŠ¶æ€
+        isSelectingTarget = false;
+        currentSelectingCharacter = null;
+
+        // æ›´æ–°UI
+        UpdateUI();
+    }
+
+    public void OnEnemyTargetSelected(CharacterData enemyCharacter)
+    {
+        if (isSelectingTarget)
+        {
+            Debug.Log($"Target selected: {enemyCharacter.characterName}");
+            // TODO: Apply card effect to the target
+
+            isSelectingTarget = false;
+            currentSelectingCharacter = null;
+        }
+        else
+        { 
+            Debug.Log($"Clicked on {enemyCharacter.characterName} but not in target selection mode.");
+        }
+    } // æ˜¯å¦æ­£åœ¨é€‰æ‹©ç›®æ ‡
 
     private CardSelectionSystem cardSelectionSystem;
     private bool isInitialized = false;
+
+    public void CheckBattleEnd()
+    {
+        bool allEnemiesDead = battleData.enemyTeam.TrueForAll(e => e.isDead);
+        bool allPlayersDead = battleData.playerTeam.TrueForAll(p => p.isDead);
+
+        if (allEnemiesDead)
+        {
+            Debug.Log("æˆ˜æ–—èƒœåˆ©ï¼");
+            if (victoryPanel != null) victoryPanel.SetActive(true);
+        }
+        else if (allPlayersDead)
+        {
+            Debug.Log("æˆ˜æ–—å¤±è´¥ï¼");
+            if (defeatPanel != null) defeatPanel.SetActive(true);
+        }
+    }
 
     void Awake()
     {
@@ -40,15 +136,15 @@ public class BattleManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            Debug.Log("BattleManagerÊµÀı´´½¨");
+            Debug.Log("BattleManagerå®ä¾‹åˆ›å»º");
 
-            // Á¢¼´³õÊ¼»¯Êı¾İ£¬²»µÈ´ıStart
+            // åœ¨æ­¤åˆå§‹åŒ–æ•°æ®ï¼Œè€Œä¸æ˜¯ç­‰Start
             InitializeWithTestData();
             isInitialized = true;
         }
         else
         {
-            Debug.Log("´æÔÚÖØ¸´µÄBattleManager£¬Ïú»Ù");
+            Debug.Log("å‘ç°é‡å¤çš„BattleManagerï¼Œé”€æ¯");
             Destroy(gameObject);
         }
     }
@@ -60,21 +156,21 @@ public class BattleManager : MonoBehaviour
         if (nextTurnButton != null)
         {
             nextTurnButton.onClick.AddListener(EndPlayerTurn);
-            Debug.Log("ÏÂÒ»»ØºÏ°´Å¥ÊÂ¼ş°ó¶¨");
+            Debug.Log("ä¸‹ä¸€å›åˆæŒ‰é’®äº‹ä»¶ç»‘å®š");
         }
         else
         {
-            Debug.LogError("ÏÂÒ»»ØºÏ°´Å¥Î´ÉèÖÃ£¡");
+            Debug.LogError("ä¸‹ä¸€å›åˆæŒ‰é’®æœªè®¾ç½®ï¼");
         }
 
-        // ³õÊ¼»¯¿¨ÅÆÑ¡ÔñÏµÍ³
+        // åˆå§‹åŒ–å¡ç‰Œé€‰æ‹©ç³»ç»Ÿ
         InitializeCardSelectionSystem();
 
-        // È·±£UIÒÑ´´½¨
+        // ç¡®ä¿UIå·²åˆ›å»º
         CreateBattleUI();
         UpdateUI();
 
-        // Ä¬ÈÏÑ¡ÖĞµÚÒ»¸öÍæ¼Ò½ÇÉ«
+        // é»˜è®¤é€‰ä¸­çš„ç¬¬ä¸€ä¸ªæˆ‘æ–¹è§’è‰²
         if (battleData != null && battleData.playerTeam.Count > 0)
         {
             SelectCharacter(battleData.playerTeam[0]);
@@ -82,9 +178,18 @@ public class BattleManager : MonoBehaviour
         EnsureEventSystem();
     }
 
+    public void EndEnemyTurn()
+    {
+        Debug.Log("=== æ•Œæ–¹å›åˆç»“æŸï¼Œåˆ‡æ¢åˆ°æˆ‘æ–¹å›åˆ ===");
+        battleData.currentTurn++;
+        battleData.isPlayerTurn = true;
+        UpdateUI();
+        StartCoroutine(StartPlayerTurnRoutine());
+    }
+
     void InitializeCardSelectionSystem()
     {
-        // Èç¹û³¡¾°ÖĞÒÑ¾­ÓĞCardSelectionSystem£¬Ê¹ÓÃËü
+        // åœºæ™¯ä¸­å¯èƒ½å·²ç»æœ‰CardSelectionSystemåœ¨ä½¿ç”¨
         cardSelectionSystem = FindObjectOfType<CardSelectionSystem>();
 
         if (cardSelectionSystem == null && cardSelectionPanelPrefab != null)
@@ -94,65 +199,65 @@ public class BattleManager : MonoBehaviour
 
             if (cardSelectionSystem != null)
             {
-                Debug.Log("´´½¨¿¨ÅÆÑ¡ÔñÏµÍ³");
+                Debug.Log("æˆåŠŸåˆ›å»ºå¡ç‰Œé€‰æ‹©ç³»ç»Ÿ");
             }
             else
             {
-                Debug.LogError("¿¨ÅÆÑ¡ÔñÃæ°åÃ»ÓĞCardSelectionSystem×é¼ş");
+                Debug.LogError("é€‰æ‹©é¢æ¿é¢„åˆ¶ä»¶æ²¡æœ‰CardSelectionSystemç»„ä»¶");
             }
         }
     }
 
-    // Ê¹ÓÃ²âÊÔÊı¾İ³õÊ¼»¯Õ½¶·
+    // ä½¿ç”¨æµ‹è¯•æ•°æ®åˆå§‹åŒ–æˆ˜æ–—
     void InitializeWithTestData()
     {
-        Debug.Log("=== ³õÊ¼»¯²âÊÔÕ½¶·Êı¾İ ===");
+        Debug.Log("=== åˆå§‹åŒ–æµ‹è¯•æˆ˜æ–—æ•°æ® ===");
 
-        // »ñÈ¡ËùÓĞ½ÇÉ«×÷ÎªÍæ¼Ò¶ÓÎé
+        // è·å–æ‰€æœ‰è§’è‰²ä½œä¸ºæˆ‘æ–¹é˜Ÿä¼
         List<CharacterData> playerTeam = new List<CharacterData>();
         List<CharacterData> enemyTeam = new List<CharacterData>();
 
         if (GameDataManager.Instance == null)
         {
-            Debug.LogError("GameDataManagerÎ´ÕÒµ½£¡");
-            // ´´½¨ÁÙÊ±µÄGameDataManager
+            Debug.LogError("GameDataManageræœªæ‰¾åˆ°ï¼");
+            // ç´§æ€¥åˆ›å»ºä¸´æ—¶GameDataManager
             GameObject go = new GameObject("TempGameDataManager");
             go.AddComponent<GameDataManager>();
         }
 
         var allCharacters = GameDataManager.Instance.GetAllCharacters();
-        Debug.Log($"´ÓGameDataManager»ñÈ¡µ½ {allCharacters.Count} ¸ö½ÇÉ«");
+        Debug.Log($"ä»GameDataManagerè·å–åˆ° {allCharacters.Count} ä¸ªè§’è‰²");
 
         if (allCharacters.Count == 0)
         {
-            Debug.LogError("Ã»ÓĞ½ÇÉ«Êı¾İ£¡´´½¨²âÊÔ½ÇÉ«...");
-            // ´´½¨²âÊÔ½ÇÉ«
-            playerTeam.Add(CreateTestCharacter("²âÊÔ½ÇÉ«1", Color.red));
-            playerTeam.Add(CreateTestCharacter("²âÊÔ½ÇÉ«2", Color.green));
-            playerTeam.Add(CreateTestCharacter("²âÊÔ½ÇÉ«3", Color.blue));
+            Debug.LogError("æ²¡æœ‰è§’è‰²æ•°æ®ï¼Œåˆ›å»ºæµ‹è¯•è§’è‰²...");
+            // åˆ›å»ºæµ‹è¯•è§’è‰²
+            playerTeam.Add(CreateTestCharacter("æµ‹è¯•è§’è‰²1", Color.red));
+            playerTeam.Add(CreateTestCharacter("æµ‹è¯•è§’è‰²2", Color.green));
+            playerTeam.Add(CreateTestCharacter("æµ‹è¯•è§’è‰²3", Color.blue));
         }
         else
         {
-            // Ç°3¸ö½ÇÉ«×÷ÎªÍæ¼Ò¶ÓÎé
+            // å‰3ä¸ªè§’è‰²ä½œä¸ºæˆ‘æ–¹é˜Ÿä¼
             for (int i = 0; i < Mathf.Min(3, allCharacters.Count); i++)
             {
                 playerTeam.Add(allCharacters[i]);
-                Debug.Log($"Íæ¼Ò¶ÓÎéÌí¼Ó: {allCharacters[i].characterName}");
+                Debug.Log($"æˆ‘æ–¹é˜Ÿä¼æ·»åŠ : {allCharacters[i].characterName}");
             }
         }
 
-        // ´´½¨µĞÈË¶ÓÎé
+        // åˆ›å»ºéšæœºæ•Œäºº
         for (int i = 0; i < 3; i++)
         {
-            var enemyCharacter = CreateTestCharacter($"µĞÈË{i + 1}", Color.gray);
+            var enemyCharacter = CreateTestCharacter($"æ•Œäºº{i + 1}", Color.gray);
             enemyTeam.Add(enemyCharacter);
-            Debug.Log($"µĞÈË¶ÓÎéÌí¼Ó: {enemyCharacter.characterName}");
+            Debug.Log($"æ•Œæ–¹é˜Ÿä¼æ·»åŠ : {enemyCharacter.characterName}");
         }
 
         battleData = new BattleData();
         battleData.Initialize(playerTeam, enemyTeam);
 
-        // ÎªÃ¿¸ö½ÇÉ«³é³õÊ¼ÊÖÅÆ
+        // ä¸ºæ¯ä¸ªè§’è‰²æŠ½åˆå§‹æ‰‹ç‰Œ
         foreach (var character in playerTeam)
         {
             DrawInitialHand(character, 5);
@@ -163,7 +268,7 @@ public class BattleManager : MonoBehaviour
             DrawInitialHand(character, 5);
         }
 
-        Debug.Log("Õ½¶·Êı¾İ³õÊ¼»¯Íê³É");
+        Debug.Log("æˆ˜æ–—æ•°æ®åˆå§‹åŒ–å®Œæˆ");
     }
 
     CharacterData CreateTestCharacter(string name, Color color)
@@ -171,7 +276,7 @@ public class BattleManager : MonoBehaviour
         CharacterData character = new CharacterData(
             $"Test_{name}",
             name,
-            "²âÊÔ½ÇÉ«",
+            "æµ‹è¯•è§’è‰²",
             CharacterClass.Universal,
             color
         );
@@ -184,7 +289,7 @@ public class BattleManager : MonoBehaviour
 
     void DrawInitialHand(CharacterData character, int cardCount)
     {
-        // Çå¿ÕÊÖÅÆ
+        // æ¸…ç©ºæ‰‹ç‰Œ
         if (character.handCards == null)
         {
             character.handCards = new List<CardData>();
@@ -194,19 +299,19 @@ public class BattleManager : MonoBehaviour
             character.handCards.Clear();
         }
 
-        // Ìí¼ÓÒ»Ğ©²âÊÔ¿¨ÅÆ
+        // åˆ›å»ºä¸€äº›æµ‹è¯•å¡ç‰Œ
         for (int i = 0; i < cardCount; i++)
         {
             CardData testCard = new CardData(
                 $"TestCard_{i}",
-                $"²âÊÔ¿¨{i + 1}",
+                $"æµ‹è¯•å¡{i + 1}",
                 Random.Range(0, 3),
-                "²âÊÔ¿¨ÅÆÃèÊö",
+                "æµ‹è¯•å¡ç‰Œæè¿°",
                 CardType.Attack,
                 CharacterClass.Universal
             );
 
-            // Ëæ»úÑÕÉ«
+            // éšæœºé¢œè‰²
             testCard.cardColor = new Color(
                 Random.Range(0.5f, 1f),
                 Random.Range(0.5f, 1f),
@@ -216,32 +321,32 @@ public class BattleManager : MonoBehaviour
             character.handCards.Add(testCard);
         }
 
-        Debug.Log($"{character.characterName} ³éÁË {character.handCards.Count} ÕÅÊÖÅÆ");
+        Debug.Log($"{character.characterName} æŠ½äº† {character.handCards.Count} å¼ æ‰‹ç‰Œ");
     }
 
     void CreateBattleUI()
     {
-        Debug.Log("=== ´´½¨Õ½¶·UI ===");
+        Debug.Log("=== åˆ›å»ºæˆ˜æ–—UI ===");
 
         if (characterSlotPrefab == null)
         {
-            Debug.LogError("CharacterSlotÔ¤ÖÆÌåÎ´ÉèÖÃ£¡");
+            Debug.LogError("CharacterSloté¢„åˆ¶ä»¶æœªè®¾ç½®ï¼");
             return;
         }
 
         if (playerSideContainer == null)
         {
-            Debug.LogError("Íæ¼Ò²àÈİÆ÷Î´ÉèÖÃ£¡");
+            Debug.LogError("æˆ‘æ–¹å®¹å™¨æœªè®¾ç½®ï¼");
             return;
         }
 
         if (enemySideContainer == null)
         {
-            Debug.LogError("µĞÈË²àÈİÆ÷Î´ÉèÖÃ£¡");
+            Debug.LogError("æ•Œæ–¹å®¹å™¨æœªè®¾ç½®ï¼");
             return;
         }
 
-        // Çå¿ÕÏÖÓĞUI
+        // æ¸…ç†æ—§çš„UI
         foreach (Transform child in playerSideContainer)
         {
             Destroy(child.gameObject);
@@ -252,58 +357,58 @@ public class BattleManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        // ´´½¨Íæ¼Ò½ÇÉ«UI
-        Debug.Log($"´´½¨ {battleData.playerTeam.Count} ¸öÍæ¼Ò½ÇÉ«UI");
+        // åˆ›å»ºæˆ‘æ–¹è§’è‰²UI
+        Debug.Log($"åˆ›å»º {battleData.playerTeam.Count} ä¸ªæˆ‘æ–¹è§’è‰²UI");
         for (int i = 0; i < battleData.playerTeam.Count; i++)
         {
             CreateCharacterSlotUI(battleData.playerTeam[i], playerSideContainer, i, true);
         }
 
-        // ´´½¨µĞÈË½ÇÉ«UI
-        Debug.Log($"´´½¨ {battleData.enemyTeam.Count} ¸öµĞÈË½ÇÉ«UI");
+        // åˆ›å»ºæ•Œæ–¹è§’è‰²UI
+        Debug.Log($"åˆ›å»º {battleData.enemyTeam.Count} ä¸ªæ•Œæ–¹è§’è‰²UI");
         for (int i = 0; i < battleData.enemyTeam.Count; i++)
         {
             CreateCharacterSlotUI(battleData.enemyTeam[i], enemySideContainer, i, false);
         }
 
-        Debug.Log("Õ½¶·UI´´½¨Íê³É");
+        Debug.Log("æˆ˜æ–—UIåˆ›å»ºå®Œæˆ");
     }
 
     void CreateCharacterSlotUI(CharacterData character, Transform parent, int index, bool isPlayer)
     {
         if (characterSlotPrefab == null)
         {
-            Debug.LogError("ÎŞ·¨´´½¨½ÇÉ«²ÛÎ»£ºÔ¤ÖÆÌåÎª¿Õ");
+            Debug.LogError("æ— æ³•åˆ›å»ºè§’è‰²æ§½ä½ï¼šé¢„åˆ¶ä»¶ä¸ºç©º");
             return;
         }
 
         if (parent == null)
         {
-            Debug.LogError("ÎŞ·¨´´½¨½ÇÉ«²ÛÎ»£º¸¸ÈİÆ÷Îª¿Õ");
+            Debug.LogError("æ— æ³•åˆ›å»ºè§’è‰²æ§½ä½ï¼šçˆ¶å®¹å™¨ä¸ºç©º");
             return;
         }
 
         GameObject slotObj = Instantiate(characterSlotPrefab, parent);
         slotObj.name = $"{character.characterName}_Slot";
 
-        // ÖØÖÃÎ»ÖÃºÍĞı×ª
+        // è®¾ç½®ä½ç½®å’Œæ—‹è½¬
         slotObj.transform.localPosition = Vector3.zero;
         slotObj.transform.localRotation = Quaternion.identity;
         slotObj.transform.localScale = Vector3.one;
 
-        // »ñÈ¡RectTransform×é¼ş
+        // è·å–RectTransformç»„ä»¶
         RectTransform rect = slotObj.GetComponent<RectTransform>();
 
-        // ÖØÖÃÃªµã
+        // è®¾ç½®é”šç‚¹
         rect.anchorMin = new Vector2(0.5f, 1f);
         rect.anchorMax = new Vector2(0.5f, 1f);
         rect.pivot = new Vector2(0.5f, 1f);
 
-        // ÉèÖÃÎ»ÖÃ - ´¹Ö±ÅÅÁĞ
+        // è®¾ç½®ä½ç½® - å‚ç›´æ’åˆ—
         float yPosition = -index * 220f;
         rect.anchoredPosition = new Vector2(0, yPosition);
 
-        // ÉèÖÃ´óĞ¡
+        // è®¾ç½®å¤§å°
         if (isPlayer)
         {
             rect.sizeDelta = new Vector2(180, 250);
@@ -313,49 +418,57 @@ public class BattleManager : MonoBehaviour
             rect.sizeDelta = new Vector2(160, 220);
         }
 
-        // »ñÈ¡CharacterBattleUI×é¼ş²¢³õÊ¼»¯
+        // è·å–CharacterBattleUIç»„ä»¶å¹¶åˆå§‹åŒ–
         CharacterBattleUI battleUI = slotObj.GetComponent<CharacterBattleUI>();
         if (battleUI != null)
         {
+            characterUIs[character] = battleUI; // æ·»åŠ åˆ°å­—å…¸ä¸­
             battleUI.Initialize(character, isPlayer);
-            Debug.Log($"´´½¨½ÇÉ«UI: {character.characterName} (Íæ¼Ò: {isPlayer}) Î»ÖÃ: {rect.anchoredPosition}");
+            Debug.Log($"åˆ›å»ºè§’è‰²UI: {character.characterName} (ç©å®¶: {isPlayer}) ä½ç½®: {rect.anchoredPosition}");
         }
         else
         {
-            Debug.LogWarning($"½ÇÉ« {character.characterName} µÄUI×é¼şÎ´ÕÒµ½");
+            Debug.LogWarning($"è§’è‰² {character.characterName} çš„UIç»„ä»¶æœªæ‰¾åˆ°");
         }
     }
 
     void UpdateUI()
     {
-        Debug.Log("¸üĞÂUI");
+        Debug.Log("æ›´æ–°UI");
 
-        // ¸üĞÂ»ØºÏĞÅÏ¢
+        // æ›´æ–°å›åˆä¿¡æ¯
         if (turnText != null)
         {
-            turnText.text = $"µÚ {battleData.currentTurn} »ØºÏ - " +
-                          (battleData.isPlayerTurn ? "Íæ¼Ò»ØºÏ" : "µĞÈË»ØºÏ");
+            turnText.text = $"ç¬¬ {battleData.currentTurn} å›åˆ - " +
+                          (battleData.isPlayerTurn ? "ä½ çš„å›åˆ" : "æ•Œæ–¹å›åˆ");
         }
 
-        // ¸üĞÂÏÂÒ»»ØºÏ°´Å¥×´Ì¬
+        // æ›´æ–°ä¸‹ä¸€å›åˆæŒ‰é’®çŠ¶æ€
         if (nextTurnButton != null)
         {
             nextTurnButton.interactable = battleData.isPlayerTurn && CheckIfPlayerCanEndTurn();
         }
 
-        // ¸üĞÂËùÓĞ½ÇÉ«UI
+        // æ›´æ–°æ‰€æœ‰è§’è‰²UI
         UpdateAllCharacterUI();
+        UpdateBackgroundDimmer();
     }
 
     void UpdateAllCharacterUI()
     {
-        // ¸üĞÂËùÓĞCharacterBattleUI×é¼ş
-        var allBattleUIs = FindObjectsOfType<CharacterBattleUI>();
-        Debug.Log($"ÕÒµ½ {allBattleUIs.Length} ¸öCharacterBattleUI×é¼ş");
-
-        foreach (var battleUI in allBattleUIs)
+        foreach (var kvp in characterUIs)
         {
-            battleUI.UpdateUI();
+            var character = kvp.Key;
+            var ui = kvp.Value;
+
+            ui.UpdateUI();
+
+            // æ§åˆ¶TargetSelectorçš„æ˜¾éš
+            if (ui.targetSelector != null)
+            {
+                bool isSelected = (character == currentSelectedCharacter);
+                ui.targetSelector.gameObject.SetActive(isSelected);
+            }
         }
     }
 
@@ -363,17 +476,17 @@ public class BattleManager : MonoBehaviour
     {
         if (handCardContainer == null)
         {
-            Debug.LogError("ÊÖÅÆÈİÆ÷Î´ÉèÖÃ£¡");
+            Debug.LogError("æ‰‹ç‰Œå®¹å™¨æœªè®¾ç½®ï¼");
             return;
         }
 
         if (battleCardPrefab == null)
         {
-            Debug.LogError("Õ½¶·¿¨ÅÆÔ¤ÖÆÌåÎ´ÉèÖÃ£¡");
+            Debug.LogError("æˆ˜æ–—å¡ç‰Œé¢„åˆ¶ä»¶æœªè®¾ç½®ï¼");
             return;
         }
 
-        // Çå¿ÕÊÖÅÆÈİÆ÷
+        // æ¸…ç†æ—§æ‰‹ç‰Œ
         foreach (Transform child in handCardContainer)
         {
             Destroy(child.gameObject);
@@ -381,13 +494,13 @@ public class BattleManager : MonoBehaviour
 
         if (character.handCards == null || character.handCards.Count == 0)
         {
-            Debug.Log($"{character.characterName} Ã»ÓĞÊÖÅÆ");
+            Debug.Log($"{character.characterName} æ²¡æœ‰æ‰‹ç‰Œ");
             return;
         }
 
-        Debug.Log($"ÏÔÊ¾ {character.characterName} µÄÊÖÅÆ ({character.handCards.Count}ÕÅ)");
+        Debug.Log($"æ˜¾ç¤º {character.characterName} çš„æ‰‹ç‰Œ ({character.handCards.Count}å¼ )");
 
-        // ÏÔÊ¾ÊÖÅÆ£¨Ë®Æ½ÅÅÁĞ£©
+        // æ˜¾ç¤ºæ–°ç‰Œï¼Œæ°´å¹³å±…ä¸­
         float spacing = 140f;
         float startX = -spacing * (character.handCards.Count - 1) / 2f;
 
@@ -396,7 +509,7 @@ public class BattleManager : MonoBehaviour
             CardData card = character.handCards[i];
             GameObject cardObj = Instantiate(battleCardPrefab, handCardContainer);
 
-            // ÉèÖÃÎ»ÖÃ
+            // è®¾ç½®ä½ç½®
             RectTransform rect = cardObj.GetComponent<RectTransform>();
             rect.anchoredPosition = new Vector2(startX + (i * spacing), 0);
 
@@ -404,64 +517,191 @@ public class BattleManager : MonoBehaviour
             if (cardUI != null)
             {
                 cardUI.Initialize(card, character);
-                Debug.Log($"´´½¨ÊÖÅÆ {i}: {card.cardName}");
+                Debug.Log($"åˆ›å»ºå¡ç‰Œ {i}: {card.cardName}");
             }
+        }
+
+        UpdateHandCardHighlights();
+    }
+
+    public void DiscardCards(List<CardData> cardsToDiscard)
+    {
+        if (currentSelectedCharacter == null) return;
+
+        foreach (var card in cardsToDiscard)
+        {
+            currentSelectedCharacter.handCards.Remove(card);
+        }
+
+        DisplayHandCards(currentSelectedCharacter);
+    }
+    public void AttemptToPlaceCard(CardData card, CharacterData targetCharacter, int slotIndex)
+    {
+        if (isDiscardMode) return; // å¦‚æœå·²åœ¨ä¸¢å¼ƒæ¨¡å¼ï¼Œåˆ™å¿½ç•¥æ–°çš„æ”¾ç½®å°è¯•
+
+        var discardRequirement = card.consumptionRequirements.Find(r => r.consumptionType == CardConsumptionType.Discard);
+
+        if (discardRequirement != null && discardRequirement.requiredCount > 0)
+        {
+            Debug.Log($"å¡ç‰Œ {card.cardName} éœ€è¦å¼ƒæ‰ {discardRequirement.requiredCount} å¼ ç±»å‹ä¸º {discardRequirement.requiredCardType} çš„ç‰Œ");
+            cardConsumptionUI.Show(card, targetCharacter, slotIndex, discardRequirement.requiredCount, discardRequirement.requiredCardType);
+        }
+        else
+        {
+            Debug.Log($"å¡ç‰Œ {card.cardName} æ— éœ€å¼ƒç‰Œï¼Œç›´æ¥æ”¾ç½®");
+            PlaceCardInSlot(card, targetCharacter, slotIndex, new List<CardData>());
         }
     }
 
+    // è¿›å…¥å¼ƒç‰Œæ¨¡å¼
+    public void EnterDiscardMode(CardData card, CharacterData target, int slotIndex, int count, CardType type)
+    {
+        isDiscardMode = true;
+        cardToPlay = card;
+        discardTargetCharacter = target;
+        discardSlotIndex = slotIndex;
+        requiredDiscardCount = count;
+        requiredCardType = type;
+        cardsToDiscard.Clear();
 
+        Debug.Log($"è¿›å…¥å¼ƒç‰Œæ¨¡å¼: éœ€è¦å¼ƒæ‰ {count} å¼  {type} ç±»å‹çš„ç‰Œæ¥æ‰“å‡º {card.cardName}");
 
-    // ·ÅÖÃ¿¨ÅÆµ½¿¨²Û
-    // ĞŞ¸Ä¿¨ÅÆ·ÅÖÃ·½·¨£¬È·±£´¥·¢¼ì²â
-    public bool PlaceCardInSlot(CardData card, CharacterData targetCharacter, int slotIndex)
+        // æ›´æ–°UIï¼Œé«˜äº®å¯å¼ƒç½®çš„å¡ç‰Œ
+        UpdateHandCardHighlights();
+        UpdateBackgroundDimmer();
+    }
+
+    public void PlayCard(CardData card)
+    {
+        var discardRequirement = card.consumptionRequirements.Find(r => r.consumptionType == CardConsumptionType.Discard);
+
+        if (discardRequirement != null)
+        {
+            EnterDiscardMode(card, null, 0, discardRequirement.requiredCount, discardRequirement.requiredCardType);
+        }
+        else
+        {
+            //  å¦‚æœæ²¡æœ‰æ¶ˆè€—éœ€æ±‚ï¼Œç›´æ¥æ‰§è¡Œå¡ç‰Œæ•ˆæœ
+            //  ExecuteCardEffect(card);
+        }
+    }
+
+    private void UpdateBackgroundDimmer()
+    {
+        if (backgroundDimmer != null)
+        {
+            backgroundDimmer.gameObject.SetActive(isDiscardMode || (cardConsumptionUI != null && cardConsumptionUI.IsConsumptionPanelActive));
+        }
+    }
+
+    // å½“å¡ç‰Œè¢«é€‰æ‹©ç”¨äºä¸¢å¼ƒæ—¶è°ƒç”¨
+    public void OnCardSelectedForDiscard(CardData card)
+    {
+        if (!isDiscardMode && !cardConsumptionUI.IsConsumptionPanelActive) return;
+
+        cardConsumptionUI.SelectCardForDiscard(card);
+        UpdateHandCardHighlights();
+    }
+
+    // é€€å‡ºå¼ƒç‰Œæ¨¡å¼
+    public void ExitDiscardMode(bool cardReturnedToHand = false)
+    {
+        isDiscardMode = false;
+        cardsToDiscard.Clear();
+        UpdateHandCardHighlights();
+        UpdateBackgroundDimmer();
+
+        if (cardReturnedToHand)
+        {
+            // å¯é€‰ï¼šå¦‚æœå–æ¶ˆå¼ƒç‰Œï¼Œå°†å¡ç‰Œæ”¾å›æ‰‹ç‰Œçš„è§†è§‰æ•ˆæœ
+            Debug.Log($"å–æ¶ˆæ‰“å‡ºå¡ç‰Œ {cardToPlay.cardName}ï¼Œè¿”å›æ‰‹ç‰Œ");
+        }
+
+        cardToPlay = null;
+        discardTargetCharacter = null;
+    }
+
+    private void UpdateHandCardHighlights()
+    {
+        var handCardsUI = handCardContainer.GetComponentsInChildren<BattleCardUI>();
+        foreach (var cardUI in handCardsUI)
+        {
+            bool canBeDiscarded = isDiscardMode && cardUI.cardData.cardType == requiredCardType;
+            bool isSelectedForDiscard = cardsToDiscard.Contains(cardUI.cardData);
+            cardUI.SetHighlight(canBeDiscarded, isSelectedForDiscard);
+        }
+    }
+
+    // æ”¾ç½®å¡ç‰Œåˆ°æ§½ä½
+    public bool PlaceCardInSlot(CardData card, CharacterData targetCharacter, int slotIndex, List<CardData> discardedCards)
     {
         if (battleData == null || card == null || targetCharacter == null)
         {
-            Debug.LogError("·ÅÖÃ¿¨ÅÆ²ÎÊı´íÎó");
+            Debug.LogError("æ”¾ç½®å¡ç‰Œå‚æ•°é”™è¯¯");
             return false;
         }
 
         if (slotIndex < 0 || slotIndex >= 3)
         {
-            Debug.LogError($"ÎŞĞ§µÄ¿¨²ÛË÷Òı: {slotIndex}");
+            Debug.LogError($"æ— æ•ˆçš„å¡æ§½ç´¢å¼•: {slotIndex}");
             return false;
         }
 
-        // ¼ì²éÄ¿±ê½ÇÉ«ÊÇ·ñÓĞĞ§
+        // æ£€æŸ¥ç›®æ ‡è§’è‰²æ˜¯å¦æœ‰æ•ˆ
         if (!battleData.characterSlots.ContainsKey(targetCharacter))
         {
-            Debug.LogError($"Ä¿±ê½ÇÉ« {targetCharacter.characterName} Ã»ÓĞ¿¨²ÛÊı¾İ");
+            Debug.LogError($"ç›®æ ‡è§’è‰² {targetCharacter.characterName} æ²¡æœ‰å¡æ§½æ•°æ®");
             return false;
         }
 
         var slots = battleData.characterSlots[targetCharacter];
 
-        // Ö±½ÓÌæ»»¿¨ÅÆ
+        // ç›´æ¥æ›¿æ¢å¡ç‰Œ
         slots.slots[slotIndex] = card;
 
-        Debug.Log($"¿¨ÅÆ {card.cardName} ·ÅÖÃµ½ {targetCharacter.characterName} µÄ¿¨²Û {slotIndex}");
-        Debug.Log($"µ±Ç°¿¨²Û×´Ì¬: [0]={slots.slots[0]?.cardName}, [1]={slots.slots[1]?.cardName}, [2]={slots.slots[2]?.cardName}");
+        Debug.Log($"å¡ç‰Œ {card.cardName} æ”¾ç½®åˆ° {targetCharacter.characterName} çš„å¡æ§½ {slotIndex}");
+        Debug.Log($"å½“å‰å¡æ§½çŠ¶æ€: [0]={slots.slots[0]?.cardName}, [1]={slots.slots[1]?.cardName}, [2]={slots.slots[2]?.cardName}");
 
-        // Á¢¼´¸üĞÂUIÏÔÊ¾
+        // ä»æ‰‹ç‰Œä¸­ç§»é™¤è¢«ä¸¢å¼ƒçš„å¡ç‰Œ
+        foreach (var discardedCard in discardedCards)
+        {
+            if (currentSelectedCharacter.handCards.Contains(discardedCard))
+            {
+                currentSelectedCharacter.handCards.Remove(discardedCard);
+            }
+        }
+
+        // ä»æ‰‹ç‰Œä¸­ç§»é™¤å¡ç‰Œ
+        if (currentSelectedCharacter != null && currentSelectedCharacter.handCards.Contains(card))
+        {
+            currentSelectedCharacter.handCards.Remove(card);
+            Debug.Log($"ä» {currentSelectedCharacter.characterName} çš„æ‰‹ç‰Œä¸­ç§»é™¤äº† {card.cardName}");
+        }
+
+        DisplayHandCards(currentSelectedCharacter); // é‡æ–°æ˜¾ç¤ºæ‰‹ç‰Œ
+
+        // æ›´æ–°è§’è‰²UIæ˜¾ç¤º
         UpdateCharacterSlotUI(targetCharacter);
 
-        // Á¢¼´¼ì²éÊÇ·ñĞèÒªÑ¡ÔñÄ¿±ê
+        // æ£€æŸ¥æ˜¯å¦éœ€è¦é€‰æ‹©ç›®æ ‡
         CheckForTargetSelection(targetCharacter);
 
-        // ¸üĞÂÈ«¾ÖUI
+        // æ›´æ–°å…¨å±€UI
         UpdateUI();
+
+
 
         return true;
     }
 
-    // ¸üĞÂ½ÇÉ«µÄ¿¨²ÛUIÏÔÊ¾
+    // æ›´æ–°è§’è‰²çš„å¡æ§½UIæ˜¾ç¤º
     void UpdateCharacterSlotUI(CharacterData character)
     {
-        // ²éÕÒ½ÇÉ«µÄUI
+        // å¯»æ‰¾è§’è‰²çš„UI
         CharacterBattleUI characterUI = FindCharacterUI(character);
         if (characterUI != null && battleData.characterSlots.TryGetValue(character, out var slots))
         {
-            // ¸üĞÂ¿¨²ÛÏÔÊ¾
+            // æ›´æ–°å¡æ§½æ˜¾ç¤º
             for (int i = 0; i < 3; i++)
             {
                 CardSlotUI slotUI = characterUI.GetCardSlot(i);
@@ -480,418 +720,227 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    // ²éÕÒ½ÇÉ«UI
+    // å¯»æ‰¾è§’è‰²UI
     CharacterBattleUI FindCharacterUI(CharacterData character)
     {
-        var allCharacters = FindObjectsOfType<CharacterBattleUI>();
-        foreach (var charUI in allCharacters)
+        var allUIs = FindObjectsOfType<CharacterBattleUI>();
+        foreach (var ui in allUIs)
         {
-            if (charUI.CharacterData == character)
+            if (ui.characterData == character)
             {
-                return charUI;
+                return ui;
             }
         }
         return null;
     }
 
-    public void OnCharacterClickedAsTarget(CharacterData target)
+    // æ£€æŸ¥æ˜¯å¦éœ€è¦è¿›å…¥ç›®æ ‡é€‰æ‹©æ¨¡å¼
+    void CheckForTargetSelection(CharacterData character)
     {
-        if (!isSelectingTarget || currentSelectingCharacter == null || target == null)
+        var slots = battleData.characterSlots[character];
+        if (slots.IsReadyToActivate())
         {
-            Debug.LogWarning("ÎŞ·¨Ñ¡ÔñÄ¿±ê£º²»ÔÚÄ¿±êÑ¡ÔñÄ£Ê½");
-            return;
-        }
-
-        // ¼ì²éÄ¿±êÊÇ·ñÓĞĞ§
-        if (target.isDead)
-        {
-            Debug.LogWarning("²»ÄÜÑ¡ÔñÒÑËÀÍöµÄÄ¿±ê");
-            return;
-        }
-
-        // ¼ì²éÄ¿±êÊÇ·ñÊÇµĞÈË£¨Íæ¼ÒÖ»ÄÜÑ¡ÔñµĞÈË×÷ÎªÄ¿±ê£©
-        if (!battleData.enemyTeam.Contains(target))
-        {
-            Debug.LogWarning("Ö»ÄÜÑ¡ÔñµĞ·½Ä¿±ê");
-            return;
-        }
-
-        // ¼ÇÂ¼Ä¿±ê
-        if (battleData.characterSlots.TryGetValue(currentSelectingCharacter, out var slots))
-        {
-            slots.target = target;
-
-            Debug.Log($"Ä¿±êÑ¡ÔñÍê³É: {currentSelectingCharacter.characterName} ¡ú {target.characterName}");
-
-            // Çå³ı¸ßÁÁ
-            HighlightSelectingCharacter(false);
-            HighlightAvailableTargets(false);
-
-            // ÖØÖÃ×´Ì¬
-            currentSelectingCharacter = null;
-            isSelectingTarget = false;
-
-            // ¸üĞÂÄ¿±êÑ¡Ôñ×´Ì¬µÄUI
-            UpdateTargetSelectionUI();
-
-            // ¼ì²éÊÇ·ñ¿ÉÒÔ½áÊø»ØºÏ
-            UpdateUI();
-
-            // ÏÔÊ¾³É¹¦ĞÅÏ¢
-            ShowTargetSelectionHint($"Ä¿±êÑ¡ÔñÍê³É: {target.characterName}", true);
-        }
-    }
-
-    void UpdateTargetSelectionUI()
-    {
-        // ¸üĞÂËùÓĞ½ÇÉ«¿¨²ÛµÄÄ¿±êÏÔÊ¾
-        foreach (var character in battleData.playerTeam)
-        {
-            if (battleData.characterSlots.TryGetValue(character, out var slots))
+            // æ£€æŸ¥æ˜¯å¦æœ‰éœ€è¦é€‰æ‹©ç›®æ ‡çš„å¡ç‰Œ
+            foreach (var card in slots.slots)
             {
-                CharacterBattleUI characterUI = FindCharacterUI(character);
-                if (characterUI != null && slots.target != null)
+                if (card != null && card.requiresTarget)
                 {
-                    // ÏÔÊ¾ÒÑÑ¡ÔñµÄÄ¿±ê
-                    characterUI.SetAsSelectedTarget(true);
-
-                    // Í¬Ê±¸üĞÂÄ¿±ê½ÇÉ«µÄÏÔÊ¾
-                    CharacterBattleUI targetUI = FindCharacterUI(slots.target);
-                    if (targetUI != null)
-                    {
-                        targetUI.SetAsSelectedTarget(true);
-                    }
+                    EnterTargetSelectionMode(character);
+                    return;
                 }
             }
+
+            // å¦‚æœæ²¡æœ‰éœ€è¦é€‰æ‹©ç›®æ ‡çš„å¡ç‰Œï¼Œç›´æ¥æ¿€æ´»
+            ActivateCharacterSkills(character);
         }
     }
 
-    public void EndPlayerTurn()
+    // è¿›å…¥ç›®æ ‡é€‰æ‹©æ¨¡å¼
+    void EnterTargetSelectionMode(CharacterData character)
     {
-        Debug.Log("½áÊøÍæ¼Ò»ØºÏ");
+        isSelectingTarget = true;
+        currentSelectingCharacter = character;
+        Debug.Log($"{character.characterName} è¿›å…¥ç›®æ ‡é€‰æ‹©æ¨¡å¼");
 
-        if (!battleData.isPlayerTurn) return;
-
-        // ÇĞ»»µ½µĞÈË»ØºÏ
-        battleData.isPlayerTurn = false;
-        battleData.currentTurn++;
-        UpdateUI();
-
-        Debug.Log("ÇĞ»»µ½µĞÈË»ØºÏ");
+        // TODO: æç¤ºç©å®¶é€‰æ‹©ç›®æ ‡
+        // ä¾‹å¦‚ï¼Œé«˜äº®å¯é€‰ç›®æ ‡
     }
 
-    // Ñ¡Ôñ½ÇÉ«£¨ÏÔÊ¾ÊÖÅÆ£©
-    public void SelectCharacter(CharacterData character)
+    // æ¿€æ´»è§’è‰²æŠ€èƒ½
+    void ActivateCharacterSkills(CharacterData character)
     {
-        if (character == null || character.isDead) return;
-
-        Debug.Log($"Ñ¡Ôñ½ÇÉ«ÏÔÊ¾ÊÖÅÆ: {character.characterName}");
-
-        // Èç¹ûÕıÔÚÑ¡ÔñÄ¿±ê£¬ÏÈÈ¡Ïû
-        if (isSelectingTarget)
-        {
-            CancelTargetSelection();
-        }
-
-        currentSelectedCharacter = character;
-        DisplayHandCards(character);
-    }
-
-
-
-    // ³·»Ø¿¨ÅÆ·½·¨£¨¿ÉÑ¡£©
-    public void WithdrawCardFromSlot(CharacterData character, int slotIndex, CardData card)
-    {
-        if (battleData == null || !battleData.characterSlots.ContainsKey(character))
-        {
-            Debug.LogError("³·»Ø¿¨ÅÆ²ÎÊı´íÎó");
-            return;
-        }
-
+        Debug.Log($"æ¿€æ´» {character.characterName} çš„æŠ€èƒ½");
         var slots = battleData.characterSlots[character];
 
-        if (slotIndex < 0 || slotIndex >= 3)
+        // TODO: æ‰§è¡Œå¡ç‰Œæ•ˆæœ
+
+        // æ¸…ç©ºå¡æ§½
+        // slots.Clear();
+        UpdateCharacterSlotUI(character);
+    }
+
+    // ç»“æŸç©å®¶å›åˆ
+    public void EndPlayerTurn()
+    {
+        // æ¸…ç©ºç›®æ ‡
+        characterTargets.Clear();
+
+        if (!battleData.isPlayerTurn)
         {
-            Debug.LogError($"ÎŞĞ§µÄ¿¨²ÛË÷Òı: {slotIndex}");
+            Debug.LogWarning("ä¸æ˜¯ä½ çš„å›åˆï¼Œä¸èƒ½ç»“æŸå›åˆ");
             return;
         }
 
-        // ´Ó¿¨²ÛÒÆ³ı¿¨ÅÆ
-        slots.slots[slotIndex] = null;
+        Debug.Log("=== ç©å®¶å›åˆç»“æŸ ===");
 
-        // Ìí¼Ó»ØÊÖÅÆ
-        if (character.handCards != null)
+        // æ¿€æ´»æ‰€æœ‰æˆ‘æ–¹è§’è‰²çš„æŠ€èƒ½
+        foreach (var character in battleData.playerTeam)
         {
-            character.handCards.Add(card);
+            if (battleData.characterSlots.ContainsKey(character))
+            {
+                ActivateCharacterSkills(character);
+            }
         }
 
-        // ¸üĞÂUI
-        UpdateCharacterSlotUI(character);
+        // åˆ‡æ¢åˆ°æ•Œæ–¹å›åˆ
+        battleData.isPlayerTurn = false;
+        UpdateUI();
 
-        Debug.Log($"´Ó {character.characterName} µÄ¿¨²Û {slotIndex} ³·»Ø¿¨ÅÆ {card.cardName}");
+        // å¼€å§‹æ•Œæ–¹å›åˆ
+        StartCoroutine(EnemyTurnRoutine());
     }
 
+    // æ•Œæ–¹å›åˆé€»è¾‘
+    IEnumerator EnemyTurnRoutine()
+      {
+        Debug.Log("=== æ•Œäººå›åˆå¼€å§‹ ===");
+        nextTurnButton.interactable = false;
 
+        // è°ƒç”¨BattleAIæ¥æ‰§è¡Œæ•Œäººå›åˆ
+        if (BattleAI.Instance != null)
+        {
+            yield return BattleAI.Instance.ExecuteEnemyTurn(battleData);
+        }
+        else
+        {
+            Debug.LogError("BattleAIå®ä¾‹æœªæ‰¾åˆ°ï¼");
+            yield return new WaitForSeconds(1f); // å¦‚æœAIä¸å­˜åœ¨ï¼Œè‡³å°‘ç­‰å¾…ä¸€ä¸‹
+        }
+
+        Debug.Log("=== æ•Œäººå›åˆç»“æŸ ===");
+        EndEnemyTurn();
+    }
+
+    IEnumerator StartPlayerTurnRoutine()
+    {
+        Debug.Log("å¼€å§‹ç©å®¶å›åˆ");
+
+        // ç©å®¶å›åˆå¼€å§‹æ—¶çš„é€»è¾‘
+        foreach (var player in battleData.playerTeam)
+        {
+            if (!player.isDead)
+            {
+                player.DrawCard();
+            }
+        }
+
+        UpdateUI();
+
+        // å¯ç”¨å›åˆç»“æŸæŒ‰é’®
+        if (endTurnButton != null)
+        {
+            endTurnButton.interactable = true;
+        }
+
+        yield return null;
+    }
+
+    // è®¾ç½®è§’è‰²ç›®æ ‡
+    public void SetCharacterTarget(CharacterData character, CharacterData target)
+    {
+        if (battleData.playerTeam.Contains(character))
+        {
+            characterTargets[character] = target;
+            Debug.Log($"è§’è‰² {character.characterName} çš„ç›®æ ‡è®¾ç½®ä¸º {target.characterName}");
+
+            // æ£€æŸ¥æ˜¯å¦æ‰€æœ‰ç©å®¶è§’è‰²éƒ½å·²è®¾ç½®ç›®æ ‡
+            CheckAllTargetsSet();
+        }
+    }
+
+    private void CheckAllTargetsSet()
+    {
+        foreach (var playerChar in battleData.playerTeam)
+        {
+            if (!characterTargets.ContainsKey(playerChar) || characterTargets[playerChar] == null)
+            {
+                // åªè¦æœ‰ä¸€ä¸ªè§’è‰²æ²¡è®¾ç½®ç›®æ ‡ï¼Œå°±è¿”å›
+                return;
+            }
+        }
+
+        // å¦‚æœæ‰€æœ‰è§’è‰²éƒ½è®¾ç½®äº†ç›®æ ‡ï¼Œåˆ™é«˜äº®ç»“æŸå›åˆæŒ‰é’®
+        if (nextTurnButton != null)
+        {
+            nextTurnButton.interactable = true;
+        }
+    }
+
+    // æ£€æŸ¥ç©å®¶æ˜¯å¦å¯ä»¥ç»“æŸå›åˆ
+    bool CheckIfPlayerCanEndTurn()
+    {
+        // å¿…é¡»æ‰€æœ‰è§’è‰²éƒ½è®¾ç½®äº†ç›®æ ‡
+        foreach (var playerChar in battleData.playerTeam)
+        {
+            if (!characterTargets.ContainsKey(playerChar) || characterTargets[playerChar] == null)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // é€‰æ‹©è§’è‰²
+    public void SelectCharacter(CharacterData character)
+    {
+        if (character == null)
+        {
+            Debug.LogWarning("å°è¯•é€‰æ‹©ä¸€ä¸ªç©ºè§’è‰²");
+            return;
+        }
+
+        // åªèƒ½é€‰æ‹©æˆ‘æ–¹è§’è‰²
+        if (!battleData.playerTeam.Contains(character))
+        {
+            Debug.Log($"ä¸èƒ½é€‰æ‹©æ•Œæ–¹è§’è‰² {character.characterName}");
+            return;
+        }
+
+        // å¼ºåˆ¶é€€å‡ºç›®æ ‡é€‰æ‹©æ¨¡å¼
+        isSelectingTarget = false;
+
+        // å¼ºåˆ¶é€€å‡ºç›®æ ‡é€‰æ‹©æ¨¡å¼
+        isSelectingTarget = false;
+
+        currentSelectedCharacter = character;
+        Debug.Log($"é€‰æ‹©äº†è§’è‰²: {character.characterName}");
+
+        // æ›´æ–°æ‰‹ç‰Œæ˜¾ç¤º
+        DisplayHandCards(character);
+
+        // æ›´æ–°UIä»¥é«˜äº®æ˜¾ç¤ºé€‰ä¸­çš„è§’è‰²
+        UpdateAllCharacterUI();
+    }
+
+    // ç¡®ä¿åœºæ™¯ä¸­æœ‰EventSystem
     void EnsureEventSystem()
     {
         if (FindObjectOfType<EventSystem>() == null)
         {
-            GameObject eventSystem = new GameObject("EventSystem");
-            eventSystem.AddComponent<EventSystem>();
-            eventSystem.AddComponent<StandaloneInputModule>();
-            Debug.Log("´´½¨EventSystem");
+            GameObject eventSystemObj = new GameObject("EventSystem");
+            eventSystemObj.AddComponent<EventSystem>();
+            eventSystemObj.AddComponent<StandaloneInputModule>();
+            Debug.Log("åˆ›å»ºäº†EventSystem");
         }
-    }
-
-    // ¼ì²éÊÇ·ñĞèÒªÑ¡ÔñÄ¿±ê
-    // ¼ÓÇ¿¼ì²éÂß¼­
-    void CheckForTargetSelection(CharacterData character)
-    {
-        if (battleData == null || !battleData.characterSlots.ContainsKey(character))
-        {
-            Debug.LogWarning($"ÎŞ·¨¼ì²éÄ¿±êÑ¡Ôñ: {character?.characterName}");
-            return;
-        }
-
-        var slots = battleData.characterSlots[character];
-
-        // ¼ì²é¿¨²ÛÊÇ·ñ¶¼ÂúÁË
-        bool allSlotsFilled = true;
-        for (int i = 0; i < 3; i++)
-        {
-            if (slots.slots[i] == null)
-            {
-                allSlotsFilled = false;
-                Debug.Log($"¿¨²Û {i} Îª¿Õ");
-                break;
-            }
-        }
-
-        Debug.Log($"{character.characterName} ¿¨²ÛÒÑÂú: {allSlotsFilled}, µ±Ç°Ä¿±ê: {slots.target?.characterName ?? "ÎŞ"}");
-
-        // Èç¹û¿¨²ÛÒÑÂúÇÒÃ»ÓĞÄ¿±ê£¬½øÈëÄ¿±êÑ¡ÔñÄ£Ê½
-        if (allSlotsFilled && slots.target == null)
-        {
-            Debug.Log($"´¥·¢Ä¿±êÑ¡ÔñÄ£Ê½: {character.characterName}");
-            StartTargetSelection(character);
-        }
-        else if (!allSlotsFilled && currentSelectingCharacter == character)
-        {
-            // Èç¹ûÈ¡ÏûÁËÒ»ÕÅ¿¨ÅÆ£¬ÍË³öÄ¿±êÑ¡ÔñÄ£Ê½
-            Debug.Log($"È¡ÏûÄ¿±êÑ¡ÔñÄ£Ê½: {character.characterName}");
-            CancelTargetSelection();
-        }
-    }
-
-    // ¿ªÊ¼Ä¿±êÑ¡Ôñ
-    void StartTargetSelection(CharacterData character)
-    {
-        // Èç¹ûÒÑ¾­ÔÚÎªÄ¿±êÑ¡Ôñ£¬ÏÈÈ¡Ïû
-        if (isSelectingTarget && currentSelectingCharacter != character)
-        {
-            CancelTargetSelection();
-        }
-
-        currentSelectingCharacter = character;
-        isSelectingTarget = true;
-
-        Debug.Log($"=== ½øÈëÄ¿±êÑ¡ÔñÄ£Ê½ ===");
-        Debug.Log($"Îª½ÇÉ«Ñ¡ÔñÄ¿±ê: {character.characterName}");
-
-        // ¸ßÁÁÏÔÊ¾ĞèÒªÑ¡ÔñÄ¿±êµÄ½ÇÉ«
-        HighlightSelectingCharacter(true);
-
-        // ¸ßÁÁ¿ÉÑ¡µÄµĞ·½Ä¿±ê
-        HighlightAvailableTargets(true);
-
-        // ÏÔÊ¾ÌáÊ¾ĞÅÏ¢
-        ShowTargetSelectionHint($"ÇëÎª [{character.characterName}] Ñ¡ÔñµĞ·½Ä¿±ê", false);
-    }
-
-    // È¡ÏûÄ¿±êÑ¡Ôñ
-    void CancelTargetSelection()
-    {
-        if (!isSelectingTarget) return;
-
-        // È¡Ïû¸ßÁÁ
-        HighlightSelectingCharacter(false);
-        HighlightAvailableTargets(false);
-
-        // ÖØÖÃ×´Ì¬
-        currentSelectingCharacter = null;
-        isSelectingTarget = false;
-
-        Debug.Log("È¡ÏûÄ¿±êÑ¡Ôñ");
-    }
-
-    // ¸ßÁÁÏÔÊ¾ÕıÔÚÑ¡ÔñÄ¿±êµÄ½ÇÉ«
-    void HighlightSelectingCharacter(bool highlight)
-    {
-        if (currentSelectingCharacter == null) return;
-
-        CharacterBattleUI characterUI = FindCharacterUI(currentSelectingCharacter);
-        if (characterUI != null)
-        {
-            // Ìí¼Ó»ÆÉ«±ß¿ò»ò±³¾°
-            Image background = characterUI.GetComponent<Image>();
-            if (background != null)
-            {
-                background.color = highlight ? Color.yellow : Color.white;
-            }
-
-            Debug.Log($"{currentSelectingCharacter.characterName} ¸ßÁÁ: {highlight}");
-        }
-    }
-
-    // ¸ßÁÁ¿ÉÑ¡µÄµĞ·½Ä¿±ê
-    void HighlightAvailableTargets(bool highlight)
-    {
-        int highlightCount = 0;
-
-        foreach (var enemy in battleData.enemyTeam)
-        {
-            if (enemy.isDead)
-            {
-                Debug.Log($"Ìø¹ıËÀÍöµĞÈË: {enemy.characterName}");
-                continue;
-            }
-
-            CharacterBattleUI enemyUI = FindCharacterUI(enemy);
-            if (enemyUI != null)
-            {
-                enemyUI.SetTargetSelectable(highlight);
-                highlightCount++;
-
-                if (highlight)
-                {
-                    Debug.Log($"¸ßÁÁµĞÈË: {enemy.characterName}");
-                }
-            }
-        }
-
-        Debug.Log($"¸ßÁÁÁË {highlightCount} ¸öµĞÈË");
-    }
-
-    // Ñ¡ÔñÄ¿±ê£¨ÓÉCharacterBattleUIµ÷ÓÃ£©
-    public void SelectTarget(CharacterData target)
-    {
-        if (!isSelectingTarget || currentSelectingCharacter == null || target == null)
-        {
-            Debug.LogWarning("ÎŞ·¨Ñ¡ÔñÄ¿±ê£º²»ÔÚÄ¿±êÑ¡ÔñÄ£Ê½");
-            return;
-        }
-
-        // ¼ì²éÄ¿±êÊÇ·ñÓĞĞ§
-        if (target.isDead)
-        {
-            Debug.LogWarning("²»ÄÜÑ¡ÔñÒÑËÀÍöµÄÄ¿±ê");
-            return;
-        }
-
-        // ¼ì²éÄ¿±êÊÇ·ñÊÇµĞÈË
-        if (!battleData.enemyTeam.Contains(target))
-        {
-            Debug.LogWarning("Ö»ÄÜÑ¡ÔñµĞ·½Ä¿±ê");
-            return;
-        }
-
-        // ¼ÇÂ¼Ä¿±ê
-        if (battleData.characterSlots.TryGetValue(currentSelectingCharacter, out var slots))
-        {
-            slots.target = target;
-
-            Debug.Log($"Ä¿±êÑ¡ÔñÍê³É: {currentSelectingCharacter.characterName} ¡ú {target.characterName}");
-
-            // Çå³ı¸ßÁÁ
-            HighlightSelectingCharacter(false);
-            HighlightAvailableTargets(false);
-
-            // ÖØÖÃ×´Ì¬
-            currentSelectingCharacter = null;
-            isSelectingTarget = false;
-
-            // ¼ì²éÊÇ·ñ¿ÉÒÔ½áÊø»ØºÏ
-            UpdateUI();
-
-            // ÏÔÊ¾³É¹¦ĞÅÏ¢
-            ShowTargetSelectionHint($"Ä¿±êÑ¡ÔñÍê³É: {target.characterName}", true);
-        }
-    }
-
-    // ÏÔÊ¾Ä¿±êÑ¡ÔñÌáÊ¾
-    void ShowTargetSelectionHint(string message, bool isSuccess = false)
-    {
-        // ÕâÀï¿ÉÒÔÏÔÊ¾UIÌáÊ¾
-        Debug.Log($"Ä¿±êÑ¡ÔñÌáÊ¾: {message}");
-
-        // Èç¹ûÓĞturnText£¬¿ÉÒÔÓÃËüÏÔÊ¾ÌáÊ¾
-        if (turnText != null)
-        {
-            string originalText = turnText.text;
-            turnText.text = message;
-
-            if (isSuccess)
-            {
-                // ³É¹¦ÏûÏ¢ÏÔÊ¾2Ãëºó»Ö¸´
-                StartCoroutine(RestoreTurnText(originalText, 2f));
-            }
-        }
-    }
-
-    IEnumerator RestoreTurnText(string originalText, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-
-        if (turnText != null)
-        {
-            turnText.text = originalText;
-        }
-    }
-
-    // ¼ì²éÊÇ·ñ¿ÉÒÔ½áÊø»ØºÏ
-    bool CheckIfPlayerCanEndTurn()
-    {
-        if (battleData == null || !battleData.isPlayerTurn) return false;
-
-        // Èç¹ûÓĞ½ÇÉ«ÕıÔÚÑ¡ÔñÄ¿±ê£¬²»ÄÜ½áÊø»ØºÏ
-        if (isSelectingTarget)
-        {
-            Debug.Log("ÓĞ½ÇÉ«ÕıÔÚÑ¡ÔñÄ¿±ê£¬²»ÄÜ½áÊø»ØºÏ");
-            return false;
-        }
-
-        // ¼ì²éËùÓĞÍæ¼Ò½ÇÉ«
-        foreach (var character in battleData.playerTeam)
-        {
-            if (character.isDead) continue;
-
-            if (battleData.characterSlots.TryGetValue(character, out var slots))
-            {
-                // ¼ì²é¿¨²ÛÊÇ·ñ¶¼ÂúÁË
-                bool allSlotsFilled = true;
-                for (int i = 0; i <= 2; i++)
-                {
-                    if (slots.slots[i] == null)
-                    {
-                        allSlotsFilled = false;
-                        break;
-                    }
-                }
-
-                // Èç¹û¿¨²ÛÂúÁËµ«Ã»Ñ¡Ä¿±ê£¬²»ÄÜ½áÊø»ØºÏ
-                if (allSlotsFilled && slots.target == null)
-                {
-                    Debug.Log($"½ÇÉ« {character.characterName} ¿¨²ÛÒÑÂúµ«Î´Ñ¡ÔñÄ¿±ê");
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    public bool IsSelectingTarget()
-    {
-        return isSelectingTarget;
     }
 }

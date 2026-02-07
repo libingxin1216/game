@@ -14,21 +14,21 @@ public class CharacterData
     public CharacterClass characterClass;
     public Color characterColor = Color.white;
 
-    // ÅÆ¿âÏà¹Ø
+    // ï¿½Æ¿ï¿½ï¿½ï¿½ï¿½
     public List<CardData> uniqueDeck = new List<CardData>();
-    public List<CardData> addedCards = new List<CardData>(); // Ìí¼ÓµÄÍ¨ÓÃÅÆ
-    public List<CardData> battleDeck = new List<CardData>(); // Õ½¶·ÅÆ¿â£¨ÌØÓÐ+Í¨ÓÃ£©
-    public List<CardData> handCards = new List<CardData>();  // ÊÖÅÆ - Õâ¸ö±ØÐëÓÐ
-    public List<CardData> discardPile = new List<CardData>(); // ÆúÅÆ¶Ñ
+    public List<CardData> addedCards = new List<CardData>(); // ï¿½ï¿½ï¿½Óµï¿½Í¨ï¿½ï¿½ï¿½ï¿½
+    public List<CardData> battleDeck = new List<CardData>(); // Õ½ï¿½ï¿½ï¿½Æ¿â£¨ï¿½ï¿½ï¿½ï¿½+Í¨ï¿½Ã£ï¿½
+    public List<CardData> handCards = new List<CardData>();  // ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    public List<CardData> discardPile = new List<CardData>(); // ï¿½ï¿½ï¿½Æ¶ï¿½
 
-    // ×´Ì¬Ð§¹û
+    // ×´Ì¬Ð§ï¿½ï¿½
     public List<StatusEffect> statusEffects = new List<StatusEffect>();
     public int shield = 0;
 
-    // ÁÙÊ±Ð§¹û×Öµä
+    // ï¿½ï¿½Ê±Ð§ï¿½ï¿½ï¿½Öµï¿½
     public Dictionary<string, object> temporaryEffects = new Dictionary<string, object>();
 
-    // ¹¹Ôìº¯Êý
+    // ï¿½ï¿½ï¿½ìº¯ï¿½ï¿½
     public CharacterData(string id, string name, string desc, CharacterClass charClass, Color color)
     {
         characterId = id;
@@ -37,7 +37,7 @@ public class CharacterData
         characterClass = charClass;
         characterColor = color;
 
-        // ³õÊ¼»¯ÉúÃüÖµ
+        // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
         currentHealth = maxHealth;
         isDead = false;
         shield = 0;
@@ -51,47 +51,47 @@ public class CharacterData
         temporaryEffects = new Dictionary<string, object>();
     }
 
-    // Ìí¼ÓÁÙÊ±Ð§¹û
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±Ð§ï¿½ï¿½
     public void AddTemporaryEffect(string effectName, object value = null)
     {
         temporaryEffects[effectName] = value ?? true;
     }
 
-    // ¼ì²éÊÇ·ñÓÐÁÙÊ±Ð§¹û
+    // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½Ê±Ð§ï¿½ï¿½
     public bool HasTemporaryEffect(string effectName)
     {
         return temporaryEffects.ContainsKey(effectName);
     }
 
-    // ÒÆ³ýÁÙÊ±Ð§¹û
+    // ï¿½Æ³ï¿½ï¿½ï¿½Ê±Ð§ï¿½ï¿½
     public void RemoveTemporaryEffect(string effectName)
     {
         temporaryEffects.Remove(effectName);
     }
 
-    // ´¥·¢×´Ì¬Ð§¹û
+    // ï¿½ï¿½ï¿½ï¿½×´Ì¬Ð§ï¿½ï¿½
     public void TriggerStatusEffect(StatusType statusType)
     {
         StatusEffect status = statusEffects.Find(s => s.type == statusType);
         if (status != null && status.stacks > 0)
         {
-            // ´¥·¢¸¯ÀÃÐ§¹û
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
             if (statusType == StatusType.Rot)
             {
-                // ¸¯ÀÃ£º»ØºÏ¿ªÊ¼Ç°Ôì³ÉÉËº¦£¬ÎÞÊÓ»¤¶Ü
+                // ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ØºÏ¿ï¿½Ê¼Ç°ï¿½ï¿½ï¿½ï¿½Ëºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó»ï¿½ï¿½ï¿½
                 TakeDamage(status.stacks, true);
-                Debug.Log($"{characterName} ´¥·¢ {status.stacks} ²ã¸¯ÀÃ£¬ÊÜµ½ {status.stacks} µãÉËº¦");
+                Debug.Log($"{characterName} ï¿½ï¿½ï¿½ï¿½ {status.stacks} ï¿½ã¸¯ï¿½Ã£ï¿½ï¿½Üµï¿½ {status.stacks} ï¿½ï¿½ï¿½Ëºï¿½");
             }
         }
     }
 
-    // ´¦Àí»ØºÏ¿ªÊ¼Ê±µÄ×´Ì¬Ð§¹û
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ØºÏ¿ï¿½Ê¼Ê±ï¿½ï¿½×´Ì¬Ð§ï¿½ï¿½
     public void ProcessTurnStartStatus()
     {
-        // ´¥·¢¸¯ÀÃÐ§¹û
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
         TriggerStatusEffect(StatusType.Rot);
 
-        // ¼õÉÙ×´Ì¬³ÖÐøÊ±¼ä
+        // ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
         for (int i = statusEffects.Count - 1; i >= 0; i--)
         {
             StatusEffect status = statusEffects[i];
@@ -101,39 +101,39 @@ public class CharacterData
                 status.duration--;
                 if (status.duration == 0)
                 {
-                    // ³ÖÐøÊ±¼ä½áÊø£¬ÒÆ³ý×´Ì¬
+                    // ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ³ï¿½×´Ì¬
                     statusEffects.RemoveAt(i);
-                    Debug.Log($"{characterName} µÄ {GetStatusName(status.type)} ×´Ì¬½áÊø");
+                    Debug.Log($"{characterName} ï¿½ï¿½ {GetStatusName(status.type)} ×´Ì¬ï¿½ï¿½ï¿½ï¿½");
                 }
             }
         }
 
-        // Çå¿ÕÁÙÊ±Ð§¹û
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ê±Ð§ï¿½ï¿½
         temporaryEffects.Clear();
     }
 
-    // ´¦Àí»ØºÏ½áÊøÊ±µÄ×´Ì¬Ð§¹û
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ØºÏ½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½×´Ì¬Ð§ï¿½ï¿½
     public void ProcessTurnEndStatus()
     {
-        // Ã¿»ØºÏÇå¿Õ»¤¶Ü
+        // Ã¿ï¿½Øºï¿½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½
         shield = 0;
 
-        Debug.Log($"{characterName} »ØºÏ½áÊø£¬»¤¶ÜÇå¿Õ");
+        Debug.Log($"{characterName} ï¿½ØºÏ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
     }
 
     string GetStatusName(StatusType status)
     {
         switch (status)
         {
-            case StatusType.Rot: return "¸¯ÀÃ";
+            case StatusType.Rot: return "ï¿½ï¿½ï¿½ï¿½";
             case StatusType.Strong: return "Ç¿×³";
-            case StatusType.Weak: return "Ë¥Èõ";
-            case StatusType.Shield: return "»¤¶Ü";
+            case StatusType.Weak: return "Ë¥ï¿½ï¿½";
+            case StatusType.Shield: return "ï¿½ï¿½ï¿½ï¿½";
             default: return "Î´Öª";
         }
     }
 
-    // ³õÊ¼»¯·½·¨
+    // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     public void Initialize()
     {
         currentHealth = maxHealth;
@@ -142,18 +142,18 @@ public class CharacterData
         handCards.Clear();
         statusEffects.Clear();
 
-        // ºÏ²¢ÅÆ¿â
+        // ï¿½Ï²ï¿½ï¿½Æ¿ï¿½
         battleDeck.Clear();
         battleDeck.AddRange(uniqueDeck);
         battleDeck.AddRange(addedCards);
     }
 
-    // ³éÅÆ·½·¨
+    // ï¿½ï¿½ï¿½Æ·ï¿½ï¿½ï¿½
     public void DrawCard(int count = 1)
     {
         for (int i = 0; i < count && battleDeck.Count > 0; i++)
         {
-            // ¼òµ¥ÊµÏÖ£º´ÓÅÆ¿âµÚÒ»ÕÅ³é
+            // ï¿½ï¿½Êµï¿½Ö£ï¿½ï¿½ï¿½ï¿½Æ¿ï¿½ï¿½Ò»ï¿½Å³ï¿½
             if (battleDeck.Count > 0)
             {
                 CardData card = battleDeck[0];
@@ -163,7 +163,7 @@ public class CharacterData
         }
     }
 
-    // ÆúÅÆ·½·¨
+    // ï¿½ï¿½ï¿½Æ·ï¿½ï¿½ï¿½
     public void DiscardCard(CardData card)
     {
         if (handCards.Contains(card))
@@ -173,7 +173,7 @@ public class CharacterData
         }
     }
 
-    // ÊÜµ½ÉËº¦
+    // ï¿½Üµï¿½ï¿½Ëºï¿½
     public void TakeDamage(int damage, bool ignoreShield = false)
     {
         if (isDead) return;
@@ -199,10 +199,11 @@ public class CharacterData
         {
             currentHealth = 0;
             isDead = true;
+            BattleManager.Instance.CheckBattleEnd();
         }
     }
 
-    // ÖÎÁÆ
+    // ï¿½ï¿½ï¿½ï¿½
     public void Heal(int amount)
     {
         if (isDead) return;
@@ -214,20 +215,20 @@ public class CharacterData
         }
     }
 
-    // Ìí¼Ó»¤¶Ü
+    // ï¿½ï¿½ï¿½Ó»ï¿½ï¿½ï¿½
     public void AddShield(int amount)
     {
         shield += amount;
     }
 
-    // Ìí¼Ó×´Ì¬
-    // ÔÚ CharacterData.cs ÖÐÌí¼ÓÕâ¸ö·½·¨£º
+    // ï¿½ï¿½ï¿½ï¿½×´Ì¬
+    // ï¿½ï¿½ CharacterData.cs ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     public void AddStatus(StatusType statusType, int stacks = 1, int duration = -1)
     {
         StatusEffect existing = statusEffects.Find(s => s.type == statusType);
         if (existing != null)
         {
-            // µþ¼Ó²ãÊý
+            // ï¿½ï¿½ï¿½Ó²ï¿½ï¿½ï¿½
             existing.stacks += stacks;
             if (duration > 0 && existing.duration > 0)
             {
@@ -236,13 +237,13 @@ public class CharacterData
         }
         else
         {
-            // ´´½¨ÐÂ×´Ì¬
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
             StatusEffect newStatus = new StatusEffect(statusType, stacks, duration);
             statusEffects.Add(newStatus);
         }
     }
 
-    // »ñÈ¡¹¥»÷¼Ó³É/¼õÒæ
+    // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Ó³ï¿½/ï¿½ï¿½ï¿½ï¿½
     public int GetDamageModifier()
     {
         int modifier = 0;

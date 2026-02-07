@@ -1,22 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class CardGameManager : MonoBehaviour
 {
-    // µ¥ÀıÄ£Ê½
+    // å•ä¾‹æ¨¡å¼
     public static CardGameManager Instance { get; private set; }
 
-    // UIÒıÓÃ
+    // UIå…ƒç´ 
     public Text playerHealthText;
     public Text enemyHealthText;
     public Text statusText;
     public Button[] playerCardButtons;
-    public Button enemyTargetButton;  // µĞÈËÄ¿±ê°´Å¥
-    public Button cancelButton;  // È¡ÏûÑ¡Ôñ°´Å¥
+    public Button enemyTargetButton;  // æ•Œæ–¹ç›®æ ‡æŒ‰é’®
+    public Button cancelButton;  // å–æ¶ˆé€‰æ‹©æŒ‰é’®
 
-    // ÓÎÏ·Êı¾İ
+    // æ¸¸æˆæ•°æ®
     private int playerHealth = 3;
     private int enemyHealth = 3;
     private List<int> playerCards = new List<int>();
@@ -24,10 +25,11 @@ public class CardGameManager : MonoBehaviour
     private bool isPlayerTurn = true;
     private bool gameOver = false;
 
-    // Ä¿±êÑ¡Ôñ×´Ì¬
+    // ç›®æ ‡é€‰æ‹©çŠ¶æ€
     private bool isSelectingTarget = false;
     private int selectedCardIndex = -1;
     private int selectedCardType = -1;
+
 
     void Awake()
     {
@@ -43,23 +45,24 @@ public class CardGameManager : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("ÓÎÏ·³õÊ¼»¯");
+
+        Debug.Log("æ¸¸æˆå¼€å§‹ï¼");
         InitializeGame();
         UpdateUI();
     }
 
     void InitializeGame()
     {
-        Debug.Log("³õÊ¼»¯ÓÎÏ·");
+        Debug.Log("åˆå§‹åŒ–æ¸¸æˆ");
         playerHealth = 3;
         enemyHealth = 3;
 
         playerCards.Clear();
         enemyCards.Clear();
 
-        playerCards.Add(1); // ¿Û1Ñª
-        playerCards.Add(2); // ¿Û2Ñª
-        playerCards.Add(3); // ¼Ó2Ñª
+        playerCards.Add(1); // æ‰£1è¡€
+        playerCards.Add(2); // æ‰£2è¡€
+        playerCards.Add(3); // åŠ 2è¡€
 
         enemyCards.Add(1);
         enemyCards.Add(2);
@@ -71,33 +74,33 @@ public class CardGameManager : MonoBehaviour
         selectedCardIndex = -1;
         selectedCardType = -1;
 
-        // ³õÊ¼»¯µĞÈËÄ¿±ê°´Å¥×´Ì¬
+        // åˆå§‹åŒ–æ•Œæ–¹ç›®æ ‡æŒ‰é’®çŠ¶æ€
         UpdateEnemyTargetButton();
 
-        statusText.text = "Íæ¼Ò»ØºÏ - ÇëÑ¡ÔñÒ»ÕÅÅÆ";
-        Debug.Log("³õÊ¼»¯Íê³É");
+        statusText.text = "ä½ çš„å›åˆ - è¯·é€‰æ‹©ä¸€å¼ ç‰Œ";
+        Debug.Log("åˆå§‹åŒ–å®Œæˆ");
     }
 
     void UpdateUI()
     {
-        Debug.Log($"¸üĞÂUI: Íæ¼ÒÉúÃü={playerHealth}, µĞÈËÉúÃü={enemyHealth}");
+        Debug.Log($"æ›´æ–°UI: ç©å®¶ç”Ÿå‘½å€¼={playerHealth}, æ•Œäººç”Ÿå‘½å€¼={enemyHealth}");
 
         if (playerHealthText != null)
-            playerHealthText.text = $"Íæ¼ÒÉúÃüÖµ: {playerHealth}";
+            playerHealthText.text = $"ç©å®¶ç”Ÿå‘½å€¼: {playerHealth}";
         else
-            Debug.LogError("playerHealthTextÎª¿Õ£¡");
+            Debug.LogError("playerHealthTextä¸ºç©ºï¼");
 
         if (enemyHealthText != null)
-            enemyHealthText.text = $"µĞ·½ÉúÃüÖµ: {enemyHealth}";
+            enemyHealthText.text = $"æ•Œæ–¹ç”Ÿå‘½å€¼: {enemyHealth}";
         else
-            Debug.LogError("enemyHealthTextÎª¿Õ£¡");
+            Debug.LogError("enemyHealthTextä¸ºç©ºï¼");
 
-        // ¸üĞÂ¿¨ÅÆ°´Å¥
+        // æ›´æ–°å¡ç‰ŒæŒ‰é’®
         for (int i = 0; i < playerCardButtons.Length; i++)
         {
             if (playerCardButtons[i] == null)
             {
-                Debug.LogError($"playerCardButtons[{i}]Îª¿Õ£¡");
+                Debug.LogError($"playerCardButtons[{i}]ä¸ºç©ºï¼");
                 continue;
             }
 
@@ -106,7 +109,7 @@ public class CardGameManager : MonoBehaviour
                 playerCardButtons[i].gameObject.SetActive(true);
                 UpdateButtonText(i);
 
-                // ÔÚÑ¡ÔñÄ¿±ê×´Ì¬Ê±£¬ËùÓĞ¿¨ÅÆ°´Å¥²»¿É½»»¥
+                // åœ¨é€‰æ‹©ç›®æ ‡çŠ¶æ€æ—¶ï¼Œæ‰€æœ‰å¡ç‰ŒæŒ‰é’®éƒ½åº”ç¦ç”¨
                 playerCardButtons[i].interactable = isPlayerTurn && !gameOver && !isSelectingTarget;
             }
             else
@@ -115,27 +118,27 @@ public class CardGameManager : MonoBehaviour
             }
         }
 
-        // ÔÚUpdateUI·½·¨Ä©Î²Ìí¼Ó
+        // åœ¨UpdateUIçš„æœ«å°¾æ·»åŠ 
         if (cancelButton != null)
         {
             cancelButton.gameObject.SetActive(isSelectingTarget);
             cancelButton.interactable = isSelectingTarget;
         }
 
-        // ¸üĞÂµĞÈËÄ¿±ê°´Å¥
+        // æ›´æ–°æ•Œæ–¹ç›®æ ‡æŒ‰é’®
         UpdateEnemyTargetButton();
     }
 
-    // ¸üĞÂµĞÈËÄ¿±ê°´Å¥×´Ì¬
+    // æ›´æ–°æ•Œæ–¹ç›®æ ‡æŒ‰é’®çŠ¶æ€
     void UpdateEnemyTargetButton()
     {
         if (enemyTargetButton != null)
         {
-            // °´Å¥Ò»Ö±´æÔÚ£¬µ«Ö»ÓĞÌØ¶¨Ìõ¼şÏÂ¿Éµã»÷
+            // æŒ‰é’®ä¸€ç›´å­˜åœ¨ï¼Œä½†åªæœ‰åœ¨ç‰¹å®šæƒ…å†µä¸‹æ‰å¯ç‚¹å‡»
             bool isInteractable = isSelectingTarget && isPlayerTurn && !gameOver;
             enemyTargetButton.interactable = isInteractable;
 
-            // Ê¹ÓÃÊÓ¾õ½Å±¾¿ØÖÆÍâ¹Û
+            // ä½¿ç”¨è‡ªå®šä¹‰è„šæœ¬æ¥æ§åˆ¶è§†è§‰æ•ˆæœ
             EnemyTargetButtonVisual visual = enemyTargetButton.GetComponent<EnemyTargetButtonVisual>();
             if (visual != null)
             {
@@ -150,7 +153,7 @@ public class CardGameManager : MonoBehaviour
             }
             else
             {
-                // Èç¹ûÃ»ÓĞÊÓ¾õ½Å±¾£¬Ê¹ÓÃ¼òµ¥µÄÑÕÉ«±ä»¯
+                // å¦‚æœæ²¡æœ‰è‡ªå®šä¹‰è„šæœ¬ï¼Œä½¿ç”¨ç®€å•çš„é¢œè‰²å˜åŒ–
                 Image buttonImage = enemyTargetButton.GetComponent<Image>();
                 if (buttonImage != null)
                 {
@@ -178,97 +181,97 @@ public class CardGameManager : MonoBehaviour
         {
             switch (cardType)
             {
-                case 1: buttonText.text = "¿Û1Ñª"; break;
-                case 2: buttonText.text = "¿Û2Ñª"; break;
-                case 3: buttonText.text = "¼Ó2Ñª"; break;
+                case 1: buttonText.text = "æ‰£1è¡€"; break;
+                case 2: buttonText.text = "æ‰£2è¡€"; break;
+                case 3: buttonText.text = "åŠ 2è¡€"; break;
             }
         }
     }
 
-    // Íæ¼Òµã»÷¿¨ÅÆ
+    // ç©å®¶å‡ºç‰Œ
     public void PlayCard(int cardIndex)
     {
-        Debug.Log($"Íæ¼Òµã»÷¿¨ÅÆ£¬Ë÷Òı: {cardIndex}");
+        Debug.Log($"ç©å®¶å‡ºç‰Œï¼Œç´¢å¼•: {cardIndex}");
 
         if (!isPlayerTurn)
         {
-            Debug.Log("²»ÊÇÍæ¼Ò»ØºÏ£¬²»ÄÜ³öÅÆ");
+            Debug.Log("ä¸æ˜¯ä½ çš„å›åˆï¼Œä¸èƒ½å‡ºç‰Œ");
             return;
         }
 
         if (gameOver)
         {
-            Debug.Log("ÓÎÏ·ÒÑ½áÊø£¬²»ÄÜ³öÅÆ");
+            Debug.Log("æ¸¸æˆå·²ç»“æŸï¼Œä¸èƒ½å‡ºç‰Œ");
             return;
         }
 
         if (cardIndex >= playerCards.Count)
         {
-            Debug.Log($"¿¨ÅÆË÷Òı{cardIndex}³¬³ö·¶Î§£¬Íæ¼ÒÓĞ{playerCards.Count}ÕÅÅÆ");
+            Debug.Log($"å¡ç‰Œç´¢å¼•{cardIndex}è¶…å‡ºèŒƒå›´ï¼Œæ€»å…±{playerCards.Count}å¼ ç‰Œ");
             return;
         }
 
-        Debug.Log($"Íæ¼ÒÑ¡ÔñµÄ¿¨ÅÆÀàĞÍ: {playerCards[cardIndex]}");
+        Debug.Log($"ä½ é€‰æ‹©äº†å¡ç‰Œç±»å‹: {playerCards[cardIndex]}");
         int cardType = playerCards[cardIndex];
 
-        // ¸ù¾İ¿¨ÅÆÀàĞÍ´¦Àí
+        // æ ¹æ®å¡ç‰Œç±»å‹å¤„ç†
         if (cardType == 1 || cardType == 2)
         {
-            // ¿ÛÑª¿¨ÅÆ£º½øÈëÄ¿±êÑ¡Ôñ×´Ì¬
+            // æ‰£è¡€å¡ç‰Œï¼Œè¿›å…¥ç›®æ ‡é€‰æ‹©çŠ¶æ€
             StartTargetSelection(cardIndex, cardType);
         }
         else if (cardType == 3)
         {
-            // ¼ÓÑª¿¨ÅÆ£ºÖ±½ÓÉúĞ§£¬²»ĞèÒªÑ¡ÔñÄ¿±ê
+            // åŠ è¡€å¡ç‰Œï¼Œç›´æ¥ç”Ÿæ•ˆï¼Œæ— éœ€é€‰æ‹©ç›®æ ‡
             ExecuteHealCard(cardIndex);
         }
 
         UpdateUI();
     }
 
-    // ¿ªÊ¼Ä¿±êÑ¡Ôñ
+    // å¼€å§‹ç›®æ ‡é€‰æ‹©
     void StartTargetSelection(int cardIndex, int cardType)
     {
-        Debug.Log($"¿ªÊ¼Ä¿±êÑ¡Ôñ£¬¿¨ÅÆË÷Òı: {cardIndex}, ÀàĞÍ: {cardType}");
+        Debug.Log($"å¼€å§‹ç›®æ ‡é€‰æ‹©ï¼Œå¡ç‰Œç´¢å¼•: {cardIndex}, ç±»å‹: {cardType}");
 
-        // ½øÈëÄ¿±êÑ¡Ôñ×´Ì¬
+        // è®¾ç½®ç›®æ ‡é€‰æ‹©çŠ¶æ€
         isSelectingTarget = true;
         selectedCardIndex = cardIndex;
         selectedCardType = cardType;
 
-        // ¸üĞÂ×´Ì¬ÎÄ±¾
-        statusText.text = "Çëµã»÷µĞ·½È·ÈÏ¹¥»÷";
+        // æ›´æ–°çŠ¶æ€æ–‡æœ¬
+        statusText.text = "ç‚¹å‡»æ•Œæ–¹ç¡®è®¤æ”»å‡»";
 
         UpdateUI();
     }
 
-    // È¡ÏûÄ¿±êÑ¡Ôñ
+    // å–æ¶ˆç›®æ ‡é€‰æ‹©
     void CancelTargetSelection()
     {
-        Debug.Log("È¡ÏûÄ¿±êÑ¡Ôñ");
+        Debug.Log("å–æ¶ˆç›®æ ‡é€‰æ‹©");
 
         isSelectingTarget = false;
         selectedCardIndex = -1;
         selectedCardType = -1;
 
-        // ¸üĞÂ×´Ì¬ÎÄ±¾
-        statusText.text = "Íæ¼Ò»ØºÏ - ÇëÑ¡ÔñÒ»ÕÅÅÆ";
+        // æ›´æ–°çŠ¶æ€æ–‡æœ¬
+        statusText.text = "ä½ çš„å›åˆ - è¯·é€‰æ‹©ä¸€å¼ ç‰Œ";
 
         UpdateUI();
     }
 
-    // Íæ¼Òµã»÷µĞÈËÄ¿±ê
+    // ç©å®¶ç‚¹å‡»æ•Œæ–¹ç›®æ ‡
     public void OnEnemyTargetClicked()
     {
-        Debug.Log("Íæ¼Òµã»÷ÁËµĞÈËÄ¿±ê");
+        Debug.Log("ç©å®¶ç‚¹å‡»äº†æ•Œæ–¹ç›®æ ‡");
 
         if (!isSelectingTarget || selectedCardIndex == -1)
         {
-            Debug.Log("²»ÔÚÄ¿±êÑ¡Ôñ×´Ì¬");
+            Debug.Log("éç›®æ ‡é€‰æ‹©çŠ¶æ€");
             return;
         }
 
-        // ²¥·Åµã»÷·´À¡Ğ§¹û
+        // æ’­æ”¾ç‚¹å‡»æ•ˆæœ
         if (enemyTargetButton != null)
         {
             EnemyTargetButtonVisual visual = enemyTargetButton.GetComponent<EnemyTargetButtonVisual>();
@@ -278,134 +281,134 @@ public class CardGameManager : MonoBehaviour
             }
         }
 
-        // Ö´ĞĞ¹¥»÷
+        // æ‰§è¡Œæ”»å‡»
         ExecuteAttack();
     }
 
-    // Ö´ĞĞ¹¥»÷
+    // æ‰§è¡Œæ”»å‡»
     void ExecuteAttack()
     {
-        Debug.Log($"Ö´ĞĞ¹¥»÷£¬¿¨ÅÆÀàĞÍ: {selectedCardType}");
+        Debug.Log($"æ‰§è¡Œæ”»å‡»ï¼Œå¡ç‰Œç±»å‹: {selectedCardType}");
 
-        // Ö´ĞĞ¿¨ÅÆĞ§¹û
+        // æ‰§è¡Œå¡ç‰Œæ•ˆæœ
         ExecuteCardEffect(selectedCardType, true);
 
-        // ÒÆ³ıÊ¹ÓÃµÄ¿¨ÅÆ
+        // ç§»é™¤å·²ä½¿ç”¨çš„å¡ç‰Œ
         playerCards.RemoveAt(selectedCardIndex);
 
-        // ÖØÖÃÑ¡Ôñ×´Ì¬
+        // é‡ç½®é€‰æ‹©çŠ¶æ€
         isSelectingTarget = false;
         selectedCardIndex = -1;
         selectedCardType = -1;
 
-        // ¼ì²éÓÎÏ·ÊÇ·ñ½áÊø
+        // æ£€æŸ¥æ¸¸æˆæ˜¯å¦ç»“æŸ
         CheckGameOver();
 
-        // Èç¹ûÓÎÏ·Î´½áÊø£¬ÇĞ»»µ½µĞ·½»ØºÏ
+        // å¦‚æœæ¸¸æˆæœªç»“æŸï¼Œåˆ™åˆ‡æ¢åˆ°æ•Œæ–¹å›åˆ
         if (!gameOver)
         {
             isPlayerTurn = false;
-            statusText.text = "µĞ·½»ØºÏ";
-            Debug.Log("ÇĞ»»µ½µĞ·½»ØºÏ");
+            statusText.text = "æ•Œæ–¹å›åˆ";
+            Debug.Log("åˆ‡æ¢åˆ°æ•Œæ–¹å›åˆ");
             StartCoroutine(EnemyTurn());
         }
 
         UpdateUI();
     }
 
-    // Ö´ĞĞÖÎÁÆ¿¨ÅÆ
+    // æ‰§è¡Œæ²»ç–—å¡ç‰Œ
     void ExecuteHealCard(int cardIndex)
     {
-        Debug.Log("Ö´ĞĞÖÎÁÆ¿¨ÅÆ");
+        Debug.Log("æ‰§è¡Œæ²»ç–—å¡ç‰Œ");
 
-        // Ö´ĞĞ¿¨ÅÆĞ§¹û
+        // æ‰§è¡Œå¡ç‰Œæ•ˆæœ
         ExecuteCardEffect(3, true);
         playerCards.RemoveAt(cardIndex);
 
-        // ¼ì²éÓÎÏ·ÊÇ·ñ½áÊø
+        // æ£€æŸ¥æ¸¸æˆæ˜¯å¦ç»“æŸ
         CheckGameOver();
 
-        // Èç¹ûÓÎÏ·Î´½áÊø£¬ÇĞ»»µ½µĞ·½»ØºÏ
+        // å¦‚æœæ¸¸æˆæœªç»“æŸï¼Œåˆ™åˆ‡æ¢åˆ°æ•Œæ–¹å›åˆ
         if (!gameOver)
         {
             isPlayerTurn = false;
-            statusText.text = "µĞ·½»ØºÏ";
-            Debug.Log("ÇĞ»»µ½µĞ·½»ØºÏ");
+            statusText.text = "æ•Œæ–¹å›åˆ";
+            Debug.Log("åˆ‡æ¢åˆ°æ•Œæ–¹å›åˆ");
             StartCoroutine(EnemyTurn());
         }
 
         UpdateUI();
     }
 
-    // Ö´ĞĞ¿¨ÅÆĞ§¹û
+    // æ‰§è¡Œå¡ç‰Œæ•ˆæœ
     void ExecuteCardEffect(int cardType, bool isPlayerUsing)
     {
-        Debug.Log($"Ö´ĞĞ¿¨ÅÆĞ§¹û: ÀàĞÍ{cardType}, Íæ¼ÒÊ¹ÓÃ: {isPlayerUsing}");
+        Debug.Log($"æ‰§è¡Œå¡ç‰Œæ•ˆæœ: ç±»å‹{cardType}, ç©å®¶ä½¿ç”¨: {isPlayerUsing}");
 
         switch (cardType)
         {
-            case 1: // ¿Û1Ñª
+            case 1: // æ‰£1è¡€
                 if (isPlayerUsing)
                 {
                     enemyHealth = Mathf.Max(0, enemyHealth - 1);
-                    Debug.Log($"µĞÈËÉúÃüÖµ¼õÉÙ1£¬µ±Ç°: {enemyHealth}");
-                    statusText.text = "Íæ¼ÒÊ¹ÓÃ£º¿Û³ıµĞ·½1µãÉúÃüÖµ";
+                    Debug.Log($"æ•Œæ–¹ç”Ÿå‘½å€¼å‡å°‘1ï¼Œå½“å‰: {enemyHealth}");
+                    statusText.text = "ä½ ä½¿ç”¨å¡ç‰Œï¼Œå¯¹æ•Œæ–¹é€ æˆ1ç‚¹ä¼¤å®³";
                 }
                 else
                 {
                     playerHealth = Mathf.Max(0, playerHealth - 1);
-                    Debug.Log($"Íæ¼ÒÉúÃüÖµ¼õÉÙ1£¬µ±Ç°: {playerHealth}");
-                    statusText.text = "µĞ·½Ê¹ÓÃ£º¿Û³ıÍæ¼Ò1µãÉúÃüÖµ";
+                    Debug.Log($"ç©å®¶ç”Ÿå‘½å€¼å‡å°‘1ï¼Œå½“å‰: {playerHealth}");
+                    statusText.text = "æ•Œæ–¹ä½¿ç”¨å¡ç‰Œï¼Œå¯¹ä½ é€ æˆ1ç‚¹ä¼¤å®³";
                 }
                 break;
 
-            case 2: // ¿Û2Ñª
+            case 2: // æ‰£2è¡€
                 if (isPlayerUsing)
                 {
                     enemyHealth = Mathf.Max(0, enemyHealth - 2);
-                    Debug.Log($"µĞÈËÉúÃüÖµ¼õÉÙ2£¬µ±Ç°: {enemyHealth}");
-                    statusText.text = "Íæ¼ÒÊ¹ÓÃ£º¿Û³ıµĞ·½2µãÉúÃüÖµ";
+                    Debug.Log($"æ•Œæ–¹ç”Ÿå‘½å€¼å‡å°‘2ï¼Œå½“å‰: {enemyHealth}");
+                    statusText.text = "ä½ ä½¿ç”¨å¡ç‰Œï¼Œå¯¹æ•Œæ–¹é€ æˆ2ç‚¹ä¼¤å®³";
                 }
                 else
                 {
                     playerHealth = Mathf.Max(0, playerHealth - 2);
-                    Debug.Log($"Íæ¼ÒÉúÃüÖµ¼õÉÙ2£¬µ±Ç°: {playerHealth}");
-                    statusText.text = "µĞ·½Ê¹ÓÃ£º¿Û³ıÍæ¼Ò2µãÉúÃüÖµ";
+                    Debug.Log($"ç©å®¶ç”Ÿå‘½å€¼å‡å°‘2ï¼Œå½“å‰: {playerHealth}");
+                    statusText.text = "æ•Œæ–¹ä½¿ç”¨å¡ç‰Œï¼Œå¯¹ä½ é€ æˆ2ç‚¹ä¼¤å®³";
                 }
                 break;
 
-            case 3: // ¼Ó2Ñª
+            case 3: // åŠ 2è¡€
                 if (isPlayerUsing)
                 {
                     playerHealth += 2;
-                    Debug.Log($"Íæ¼ÒÉúÃüÖµÔö¼Ó2£¬µ±Ç°: {playerHealth}");
-                    statusText.text = "Íæ¼ÒÊ¹ÓÃ£ºÔö¼Ó×ÔÉí2µãÉúÃüÖµ";
+                    Debug.Log($"ç©å®¶ç”Ÿå‘½å€¼å¢åŠ 2ï¼Œå½“å‰: {playerHealth}");
+                    statusText.text = "ä½ ä½¿ç”¨å¡ç‰Œï¼Œæ¢å¤2ç‚¹ç”Ÿå‘½å€¼";
                 }
                 else
                 {
                     enemyHealth += 2;
-                    Debug.Log($"µĞÈËÉúÃüÖµÔö¼Ó2£¬µ±Ç°: {enemyHealth}");
-                    statusText.text = "µĞ·½Ê¹ÓÃ£ºÔö¼Ó×ÔÉí2µãÉúÃüÖµ";
+                    Debug.Log($"æ•Œæ–¹ç”Ÿå‘½å€¼å¢åŠ 2ï¼Œå½“å‰: {enemyHealth}");
+                    statusText.text = "æ•Œæ–¹ä½¿ç”¨å¡ç‰Œï¼Œæ¢å¤2ç‚¹ç”Ÿå‘½å€¼";
                 }
                 break;
         }
     }
 
-    // µĞ·½»ØºÏ
+    // æ•Œæ–¹å›åˆ
     IEnumerator EnemyTurn()
     {
-        Debug.Log("¿ªÊ¼µĞ·½»ØºÏ");
+        Debug.Log("å¼€å§‹æ•Œæ–¹å›åˆ");
 
-        // µÈ´ı1.5ÃëÈÃÍæ¼Ò¿´µ½»ØºÏÇĞ»»
+        // ç­‰å¾…1.5ç§’ï¼Œè®©ç©å®¶çœ‹åˆ°å›åˆåˆ‡æ¢
         yield return new WaitForSeconds(1.5f);
 
         if (enemyCards.Count > 0 && !gameOver)
         {
             int randomIndex = Random.Range(0, enemyCards.Count);
             int cardType = enemyCards[randomIndex];
-            Debug.Log($"µĞ·½³öÅÆ: Ë÷Òı{randomIndex}, ÀàĞÍ{cardType}");
+            Debug.Log($"æ•Œæ–¹å‡ºç‰Œ: ç´¢å¼•{randomIndex}, ç±»å‹{cardType}");
 
-            // Ö±½ÓÖ´ĞĞ¿¨ÅÆĞ§¹û
+            // ç›´æ¥æ‰§è¡Œå¡ç‰Œæ•ˆæœ
             ExecuteCardEffect(cardType, false);
             enemyCards.RemoveAt(randomIndex);
 
@@ -414,58 +417,58 @@ public class CardGameManager : MonoBehaviour
             if (!gameOver)
             {
                 isPlayerTurn = true;
-                statusText.text = "Íæ¼Ò»ØºÏ - ÇëÑ¡ÔñÒ»ÕÅÅÆ";
-                Debug.Log("ÇĞ»»»ØÍæ¼Ò»ØºÏ");
+                statusText.text = "ä½ çš„å›åˆ - è¯·é€‰æ‹©ä¸€å¼ ç‰Œ";
+                Debug.Log("åˆ‡æ¢åˆ°ä½ çš„å›åˆ");
             }
         }
         else
         {
-            Debug.Log("µĞ·½Ã»ÓĞ¿¨ÅÆÁË");
+            Debug.Log("æ•Œæ–¹æ²¡æœ‰å¡ç‰Œäº†");
         }
 
         UpdateUI();
     }
 
-    // ¼ì²éÓÎÏ·ÊÇ·ñ½áÊø
+    // æ£€æŸ¥æ¸¸æˆæ˜¯å¦ç»“æŸ
     void CheckGameOver()
     {
-        // ¼ì²éÉúÃüÖµ
+        // æ£€æŸ¥ç”Ÿå‘½å€¼
         if (playerHealth <= 0 || enemyHealth <= 0)
         {
             gameOver = true;
             if (playerHealth <= 0 && enemyHealth <= 0)
-                statusText.text = "Æ½¾Ö£¡Ë«·½ÉúÃüÖµ¶¼Îª0";
+                statusText.text = "å¹³å±€ï¼åŒæ–¹ç”Ÿå‘½å€¼éƒ½ä¸º0";
             else if (playerHealth <= 0)
-                statusText.text = "ÓÎÏ·½áÊø£¡µĞ·½Ê¤Àû";
+                statusText.text = "æ¸¸æˆç»“æŸï¼Œæ•Œæ–¹èƒœåˆ©ï¼";
             else if (enemyHealth <= 0)
-                statusText.text = "ÓÎÏ·½áÊø£¡Íæ¼ÒÊ¤Àû";
-            Debug.Log("ÓÎÏ·½áÊø - ÉúÃüÖµÎª0");
+                statusText.text = "æ¸¸æˆç»“æŸï¼Œä½ èƒœåˆ©äº†ï¼";
+            Debug.Log("æ¸¸æˆç»“æŸ - ç”Ÿå‘½å€¼ä¸º0");
             return;
         }
 
-        // ¼ì²é¿¨ÅÆÊÇ·ñÓÃÍê
+        // æ£€æŸ¥å¡ç‰Œæ˜¯å¦è€—å°½
         if (playerCards.Count == 0 && enemyCards.Count == 0)
         {
             gameOver = true;
             if (playerHealth > enemyHealth)
-                statusText.text = $"ÓÎÏ·½áÊø£¡Íæ¼ÒÊ¤Àû ({playerHealth} vs {enemyHealth})";
+                statusText.text = $"æ¸¸æˆç»“æŸï¼Œä½ èƒœåˆ©äº†ï¼ ({playerHealth} vs {enemyHealth})";
             else if (enemyHealth > playerHealth)
-                statusText.text = $"ÓÎÏ·½áÊø£¡µĞ·½Ê¤Àû ({playerHealth} vs {enemyHealth})";
+                statusText.text = $"æ¸¸æˆç»“æŸï¼Œæ•Œæ–¹èƒœåˆ©ï¼ ({playerHealth} vs {enemyHealth})";
             else
-                statusText.text = $"Æ½¾Ö£¡Ë«·½ÉúÃüÖµÏàÍ¬ ({playerHealth} vs {enemyHealth})";
-            Debug.Log("ÓÎÏ·½áÊø - ¿¨ÅÆÓÃÍê");
+                statusText.text = $"å¹³å±€ï¼åŒæ–¹ç”Ÿå‘½å€¼ç›¸åŒ ({playerHealth} vs {enemyHealth})";
+            Debug.Log("æ¸¸æˆç»“æŸ - å¡ç‰Œè€—å°½");
         }
     }
 
-    // ÖØĞÂ¿ªÊ¼ÓÎÏ·
+    // é‡æ–°å¼€å§‹æ¸¸æˆ
     public void RestartGame()
     {
-        Debug.Log("ÖØĞÂ¿ªÊ¼ÓÎÏ·");
+        Debug.Log("é‡æ–°å¼€å§‹æ¸¸æˆ");
         InitializeGame();
         UpdateUI();
     }
 
-    // Ìí¼ÓÈ¡ÏûÑ¡Ôñ°´Å¥µÄ·½·¨£¨¿ÉÑ¡£©
+    // å“åº”å–æ¶ˆé€‰æ‹©æŒ‰é’®çš„å‡½æ•°ï¼Œå–æ¶ˆé€‰æ‹©
     public void CancelSelection()
     {
         if (isSelectingTarget)

@@ -34,12 +34,12 @@ public class GameDataManager : MonoBehaviour
 
     void InitializeAllData()
     {
-        Debug.Log("³õÊ¼»¯ÓÎÏ·Êı¾İ...");
+        Debug.Log("ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ï¿½...");
         ClearAllData();
         CreateUniversalCards();
         CreateCharacterCards();
         CreateCharacters();
-        Debug.Log($"³õÊ¼»¯Íê³É: {allCharacters.Count}¸ö½ÇÉ«, {universalCards.Count}ÕÅÍ¨ÓÃ¿¨ÅÆ");
+        Debug.Log($"ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½: {allCharacters.Count}ï¿½ï¿½ï¿½ï¿½É«, {universalCards.Count}ï¿½ï¿½Í¨ï¿½Ã¿ï¿½ï¿½ï¿½");
     }
 
     void ClearAllData()
@@ -53,89 +53,102 @@ public class GameDataManager : MonoBehaviour
 
     void CreateUniversalCards()
     {
-        universalCards.Add(new CardData("U001", "´ò»÷", 0, "¶ÔÑ¡¶¨µĞ·½Ôì³É2µãÉËº¦", CardType.Attack, CharacterClass.Universal)
+        universalCards.Add(new CardData("U001", "ï¿½ï¿½ï¿½", 0, "ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ğ·ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½Ëºï¿½", CardType.Attack, CharacterClass.Universal)
         { cardColor = GetCardTypeColor(CardType.Attack) });
 
-        universalCards.Add(new CardData("U002", "·ÀÓù", 0, "Ê¹×ÔÉí»ñµÃ3µã»¤¶Ü", CardType.Defense, CharacterClass.Universal)
+        universalCards.Add(new CardData("U002", "ï¿½ï¿½ï¿½ï¿½", 0, "Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3ï¿½ã»¤ï¿½ï¿½", CardType.Defense, CharacterClass.Universal)
         { cardColor = GetCardTypeColor(CardType.Defense) });
 
-        universalCards.Add(new CardData("U003", "´¢±¸Á¸", 0, "±»×÷Îª·ÑÓÃÏûºÄÊ±³éÒ»ÕÅÅÆ", CardType.Special, CharacterClass.Universal)
+        universalCards.Add(new CardData("U003", "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", 0, "ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½", CardType.Special, CharacterClass.Universal)
         { cardColor = GetCardTypeColor(CardType.Special) });
 
-        universalCards.Add(new CardData("U004", "ĞîÁ¦", 1, "ÏÂÒ»´Î¹¥»÷µÄÖ±½ÓÉËº¦X2", CardType.Buff, CharacterClass.Universal)
+        universalCards.Add(new CardData("U004", "ï¿½ï¿½ï¿½ï¿½", 1, "ï¿½ï¿½Ò»ï¿½Î¹ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½Ëºï¿½X2", CardType.Buff, CharacterClass.Universal)
         { cardColor = GetCardTypeColor(CardType.Buff) });
 
-        universalCards.Add(new CardData("U005", "×ÅÖØ·ÀÓù", 2, "Ê¹×ÔÉí»ñµÃ10µã»¤¶Ü", CardType.Defense, CharacterClass.Universal)
+        universalCards.Add(new CardData("U005", "ï¿½ï¿½ï¿½Ø·ï¿½ï¿½ï¿½", 2, "Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½10ï¿½ã»¤ï¿½ï¿½", CardType.Defense, CharacterClass.Universal)
         { cardColor = GetCardTypeColor(CardType.Defense) });
+        universalCards.Add(new CardData("U006", "ç‰ºç‰²", 1, "å¼ƒæ‰ä¸€å¼ æ”»å‡»ç‰Œï¼Œå¯¹æ‰€æœ‰æ•Œäººé€ æˆ5ç‚¹ä¼¤å®³", CardType.Attack, CharacterClass.Universal)
+        {
+            cardColor = GetCardTypeColor(CardType.Attack),
+            consumptionRequirements = new List<CardConsumptionRequirement>
+            {
+                new CardConsumptionRequirement
+                {
+                    consumptionType = CardConsumptionType.Discard,
+                    requiredCount = 1,
+                    requiredCardType = CardType.Attack
+                }
+            }
+        });
     }
 
     void CreateCharacterCards()
     {
-        // ±ğÎ÷²·¿¨×é
-        beelzebubCards.Add(new CardData("B001", "Æø´«²¥", 0, "¶ÔÑ¡¶¨µĞ·½Ôì³É2µãÉËº¦Á½´Î", CardType.Attack, CharacterClass.Beelzebub)
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        beelzebubCards.Add(new CardData("B001", "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", 2, "ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ğ·ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½Ëºï¿½ï¿½ï¿½ï¿½ï¿½", CardType.Attack, CharacterClass.Beelzebub)
         { cardColor = new Color(0.7f, 0.3f, 0.8f) });
-        beelzebubCards.Add(new CardData("B002", "À£ÀÃ", 1, "¶ÔÑ¡¶¨µĞ·½Ôì³É3µãÉËº¦£¬²¢¸øÓèÒ»²ã¡¾¸¯ÀÃ¡¿", CardType.Status, CharacterClass.Beelzebub)
+        beelzebubCards.Add(new CardData("B002", "ï¿½ï¿½ï¿½ï¿½", 1, "ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ğ·ï¿½ï¿½ï¿½ï¿½3ï¿½ï¿½ï¿½Ëºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ã¡¾ï¿½ï¿½ï¿½Ã¡ï¿½", CardType.Status, CharacterClass.Beelzebub)
         { cardColor = new Color(0.6f, 0.2f, 0.7f) });
-        beelzebubCards.Add(new CardData("B003", "ÈÜ½â", 1, "¶ÔÑ¡¶¨µĞ·½¸øÓèÁ½²ã¡¾¸¯ÀÃ¡¿", CardType.Status, CharacterClass.Beelzebub)
+        beelzebubCards.Add(new CardData("B003", "ï¿½Ü½ï¿½", 1, "ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ğ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¡¾ï¿½ï¿½ï¿½Ã¡ï¿½", CardType.Status, CharacterClass.Beelzebub)
         { cardColor = new Color(0.5f, 0.1f, 0.6f) });
-        beelzebubCards.Add(new CardData("B004", "¸¯°ÜÂûÑÓ", 2, "¶ÔÈ«ÌåµĞ·½Ôì³É6µãÉËº¦£¬²¢¸øÓèÁ½²ã¡¾¸¯ÀÃ¡¿", CardType.Status, CharacterClass.Beelzebub)
+        beelzebubCards.Add(new CardData("B004", "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", 2, "ï¿½ï¿½È«ï¿½ï¿½Ğ·ï¿½ï¿½ï¿½ï¿½6ï¿½ï¿½ï¿½Ëºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¡¾ï¿½ï¿½ï¿½Ã¡ï¿½", CardType.Status, CharacterClass.Beelzebub)
         { cardColor = new Color(0.8f, 0.4f, 0.9f) });
-        beelzebubCards.Add(new CardData("B005", "¸¯°Ü±¬·¢", 2, "½áËãÒ»´ÎÈ«ÌåµĞ·½µÄ¡¾¸¯ÀÃ¡¿", CardType.Special, CharacterClass.Beelzebub)
+        beelzebubCards.Add(new CardData("B005", "ï¿½ï¿½ï¿½Ü±ï¿½ï¿½ï¿½", 2, "ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½È«ï¿½ï¿½Ğ·ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½Ã¡ï¿½", CardType.Special, CharacterClass.Beelzebub)
         { cardColor = new Color(0.9f, 0.5f, 1.0f) });
 
-        // ÂêÃÅ¿¨×é
-        mammonCards.Add(new CardData("M001", "Ï¸Ë®³¤Á÷", 0, "»Ø¸´×ÔÉí2µãÉúÃü", CardType.Heal, CharacterClass.Mammon)
+        // ï¿½ï¿½ï¿½Å¿ï¿½ï¿½ï¿½
+        mammonCards.Add(new CardData("M001", "Ï¸Ë®ï¿½ï¿½ï¿½ï¿½", 0, "ï¿½Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", CardType.Heal, CharacterClass.Mammon)
         { cardColor = new Color(1.0f, 0.9f, 0.3f) });
-        mammonCards.Add(new CardData("M002", "Ëã¼Æ", 0, "ÏÂ´Î»Ø¸´×ÔÉíÉúÃüÊ±X2", CardType.Buff, CharacterClass.Mammon)
+        mammonCards.Add(new CardData("M002", "ï¿½ï¿½ï¿½", 0, "ï¿½Â´Î»Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±X2", CardType.Buff, CharacterClass.Mammon)
         { cardColor = new Color(1.0f, 0.8f, 0.2f) });
-        mammonCards.Add(new CardData("M003", "ÉúÃü½»Ò×", 1, "¶Ô×ÔÉíÔì³É3µãÉËº¦£¬»Ø¸´ÉúÃüÖµ×îµÍµÄÓÑ·½3µãÉúÃü", CardType.Heal, CharacterClass.Mammon)
+        mammonCards.Add(new CardData("M003", "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", 1, "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3ï¿½ï¿½ï¿½Ëºï¿½ï¿½ï¿½ï¿½Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½Íµï¿½ï¿½Ñ·ï¿½3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", CardType.Heal, CharacterClass.Mammon)
         { cardColor = new Color(1.0f, 0.7f, 0.1f) });
-        mammonCards.Add(new CardData("M004", "ÎüÑª¹í", 1, "¶ÔÑ¡¶¨µĞ·½Ôì³É3µãÉËº¦£¬»Ø¸´×ÔÉí3µãÉúÃü", CardType.Attack, CharacterClass.Mammon)
+        mammonCards.Add(new CardData("M004", "ï¿½ï¿½Ñªï¿½ï¿½", 1, "ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ğ·ï¿½ï¿½ï¿½ï¿½3ï¿½ï¿½ï¿½Ëºï¿½ï¿½ï¿½ï¿½Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", CardType.Attack, CharacterClass.Mammon)
         { cardColor = new Color(1.0f, 1.0f, 0.4f) });
-        mammonCards.Add(new CardData("M005", "²ÆÔ´¹ö¹ö", 2, "»Ø¸´È«ÌåÓÑ·½5µãÉúÃü", CardType.Heal, CharacterClass.Mammon)
+        mammonCards.Add(new CardData("M005", "ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½", 2, "ï¿½Ø¸ï¿½È«ï¿½ï¿½ï¿½Ñ·ï¿½5ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", CardType.Heal, CharacterClass.Mammon)
         { cardColor = new Color(1.0f, 1.0f, 0.5f) });
 
-        // °¢Ë¹ÃÉµÙË¹¿¨×é
-        asmodeusCards.Add(new CardData("A001", "Ãé×¼ºÃ", 0, "¶ÔÖ¸¶¨µĞ·½¸øÓèÒ»²ã¡¾Ë¥Èõ¡¿", CardType.Status, CharacterClass.Asmodeus)
+        // ï¿½ï¿½Ë¹ï¿½Éµï¿½Ë¹ï¿½ï¿½ï¿½ï¿½
+        asmodeusCards.Add(new CardData("A001", "ï¿½ï¿½×¼ï¿½ï¿½", 0, "ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ğ·ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ã¡¾Ë¥ï¿½ï¿½ï¿½ï¿½", CardType.Status, CharacterClass.Asmodeus)
         { cardColor = new Color(1.0f, 0.6f, 0.8f) });
-        asmodeusCards.Add(new CardData("A002", "ÍÂÆøÈçÀ¼", 1, "Ê¹Ëæ»úÓÑ·½»ñµÃÒ»²ã¡¾Ç¿×³¡¿", CardType.Buff, CharacterClass.Asmodeus)
+        asmodeusCards.Add(new CardData("A002", "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", 1, "Ê¹ï¿½ï¿½ï¿½ï¿½Ñ·ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ã¡¾Ç¿×³ï¿½ï¿½", CardType.Buff, CharacterClass.Asmodeus)
         { cardColor = new Color(1.0f, 0.5f, 0.7f) });
-        asmodeusCards.Add(new CardData("A003", "Ô®»¤", 1, "Ê¹Ëæ»úÓÑ·½»ñµÃ5µã»¤¶Ü", CardType.Defense, CharacterClass.Asmodeus)
+        asmodeusCards.Add(new CardData("A003", "Ô®ï¿½ï¿½", 1, "Ê¹ï¿½ï¿½ï¿½ï¿½Ñ·ï¿½ï¿½ï¿½ï¿½5ï¿½ã»¤ï¿½ï¿½", CardType.Defense, CharacterClass.Asmodeus)
         { cardColor = new Color(1.0f, 0.4f, 0.6f) });
-        asmodeusCards.Add(new CardData("A004", "ÎŞÇé³é´ò", 2, "¶ÔÈ«ÌåµĞ·½Ëæ»úÔì³É4µãÉËº¦3´Î", CardType.Attack, CharacterClass.Asmodeus)
+        asmodeusCards.Add(new CardData("A004", "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", 2, "ï¿½ï¿½È«ï¿½ï¿½Ğ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½4ï¿½ï¿½ï¿½Ëºï¿½3ï¿½ï¿½", CardType.Attack, CharacterClass.Asmodeus)
         { cardColor = new Color(1.0f, 0.7f, 0.9f) });
-        asmodeusCards.Add(new CardData("A005", "±áËğ", 2, "¶ÔÈ«ÌåµĞ·½¸øÓèÒ»²ã¡¾Ë¥Èõ¡¿", CardType.Status, CharacterClass.Asmodeus)
+        asmodeusCards.Add(new CardData("A005", "ï¿½ï¿½ï¿½ï¿½", 2, "ï¿½ï¿½È«ï¿½ï¿½Ğ·ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ã¡¾Ë¥ï¿½ï¿½ï¿½ï¿½", CardType.Status, CharacterClass.Asmodeus)
         { cardColor = new Color(1.0f, 0.8f, 1.0f) });
     }
 
     void CreateCharacters()
     {
-        Debug.Log("´´½¨½ÇÉ«...");
+        Debug.Log("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«...");
 
-        // ±ğÎ÷²· - ×ÏÉ«
-        CharacterData beelzebub = new CharacterData("C001", "±ğÎ÷²·",
-            "Ó¬Íõ×ÅÖØÓÚÎªµĞÈË¹ÒÉÏ³ÖĞøÉËº¦×´Ì¬£¬Ò»µ©Æô¶¯Íê³É£¬¶¾ĞÔ½«»á¼«ÆäÇ¿ÁÒ",
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½É«
+        CharacterData beelzebub = new CharacterData("C001", "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
+            "Ó¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½Ë¹ï¿½ï¿½Ï³ï¿½ï¿½ï¿½ï¿½Ëºï¿½×´Ì¬ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½ï¿½ï¿½Ô½ï¿½ï¿½á¼«ï¿½ï¿½Ç¿ï¿½ï¿½",
             CharacterClass.Beelzebub, new Color(0.5f, 0.2f, 0.5f));
 
-        // Îª½ÇÉ«Ìí¼ÓÌØÓĞ¿¨ÅÆ
+        // Îªï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¿ï¿½ï¿½ï¿½
         beelzebub.uniqueDeck.AddRange(beelzebubCards);
 
-        // ³õÊ¼»¯½ÇÉ«
+        // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½É«
         beelzebub.Initialize();
         allCharacters.Add(beelzebub);
 
-        // ÂêÃÅ - ½ğÉ«
-        CharacterData mammon = new CharacterData("C002", "ÂêÃÅ",
-            "Ì°À·»·Ö÷ÊÇĞøº½ĞÔ½ÇÉ«£¬ÔÚÆäËû·½Ãæ½ÏÎªÆ¶Èõ£¬µ«×¨¾«ÓÚÖÎÁÆ",
+        // ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½É«
+        CharacterData mammon = new CharacterData("C002", "ï¿½ï¿½ï¿½ï¿½",
+            "Ì°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªÆ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
             CharacterClass.Mammon, new Color(0.9f, 0.7f, 0.1f));
 
         mammon.uniqueDeck.AddRange(mammonCards);
         mammon.Initialize();
         allCharacters.Add(mammon);
 
-        // °¢Ë¹ÃÉµÙË¹ - ·ÛÉ«
-        CharacterData asmodeus = new CharacterData("C003", "°¢Ë¹ÃÉµÙË¹",
-            "´ó÷ÈÄ§ÉÃ³¤ÔÚºó·½½øĞĞ¸¨Öú£¬ÎªÓÑ¾üÌá¹©ÔöÒæ²¢Ï÷ÈõµĞ·½£¬±ØÒªÊ±Ò²ÄÜ¸ø³ö²¿·ÖÊä³ö",
+        // ï¿½ï¿½Ë¹ï¿½Éµï¿½Ë¹ - ï¿½ï¿½É«
+        CharacterData asmodeus = new CharacterData("C003", "ï¿½ï¿½Ë¹ï¿½Éµï¿½Ë¹",
+            "ï¿½ï¿½ï¿½ï¿½Ä§ï¿½Ã³ï¿½ï¿½Úºó·½½ï¿½ï¿½Ğ¸ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½Ñ¾ï¿½ï¿½á¹©ï¿½ï¿½ï¿½æ²¢ï¿½ï¿½ï¿½ï¿½ï¿½Ğ·ï¿½ï¿½ï¿½ï¿½ï¿½ÒªÊ±Ò²ï¿½Ü¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
             CharacterClass.Asmodeus, new Color(0.8f, 0.2f, 0.3f));
 
         asmodeus.uniqueDeck.AddRange(asmodeusCards);

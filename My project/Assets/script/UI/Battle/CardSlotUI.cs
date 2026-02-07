@@ -1,18 +1,19 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class CardSlotUI : MonoBehaviour
+public class CardSlotUI : MonoBehaviour, IDropHandler
 {
-    [Header("»ù´¡ÉèÖÃ")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public int slotIndex;
     public CharacterData ownerCharacter;
 
-    [Header("UI×é¼ş")]
+    [Header("UIï¿½ï¿½ï¿½")]
     public Image slotBackground;
     public Image cardDisplay;
-    public Text slotInfoText; // ÏÔÊ¾¿¨ÅÆĞÅÏ¢
+    public Text slotInfoText; // ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 
-    [Header("ÑÕÉ«")]
+    [Header("ï¿½ï¿½É«")]
     public Color emptyColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
     public Color hasCardColor = Color.white;
 
@@ -33,12 +34,12 @@ public class CardSlotUI : MonoBehaviour
         UpdateDisplay();
     }
 
-    // ·ÅÖÃ¿¨ÅÆ
+    // ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½
     public void PlaceCard(CardData card)
     {
         currentCard = card;
 
-        // ¸üĞÂÏÔÊ¾
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
         if (cardDisplay != null)
         {
             cardDisplay.color = card.cardColor;
@@ -53,10 +54,10 @@ public class CardSlotUI : MonoBehaviour
 
         UpdateDisplay();
 
-        Debug.Log($"¿¨ÅÆ {card.cardName} ·ÅÖÃµ½¿¨²Û {slotIndex}");
+        Debug.Log($"ï¿½ï¿½ï¿½ï¿½ {card.cardName} ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ {slotIndex}");
     }
 
-    // Çå³ı¿¨ÅÆ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     public void ClearCard()
     {
         currentCard = null;
@@ -74,19 +75,35 @@ public class CardSlotUI : MonoBehaviour
         UpdateDisplay();
     }
 
-    // »ñÈ¡µ±Ç°¿¨ÅÆ
+    // ï¿½ï¿½È¡ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½
     public CardData GetCard()
     {
         return currentCard;
     }
 
-    // ¼ì²éÊÇ·ñÓĞ¿¨ÅÆ
+    // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ğ¿ï¿½ï¿½ï¿½
     public bool HasCard()
     {
         return currentCard != null;
     }
 
-    // ¸üĞÂÏÔÊ¾
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
+    public void OnDrop(PointerEventData eventData)
+    {
+        GameObject droppedObject = eventData.pointerDrag;
+        CardButtonUI cardButton = droppedObject.GetComponent<CardButtonUI>();
+
+        if (cardButton != null)
+        {
+            CardData cardData = cardButton.GetCardData();
+            if (cardData != null)
+            {
+                // å°†é€»è¾‘ç»Ÿä¸€äº¤ç»™BattleManagerå¤„ç†
+                BattleManager.Instance.AttemptToPlaceCard(cardData, ownerCharacter, slotIndex);
+            }
+        }
+    }
+
     void UpdateDisplay()
     {
         if (slotBackground != null)
@@ -95,20 +112,20 @@ public class CardSlotUI : MonoBehaviour
         }
     }
 
-    // Êó±êµã»÷£¨ÓÃÓÚºóĞøµÄ½»»»¹¦ÄÜ£©
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Úºï¿½ï¿½ï¿½ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü£ï¿½
     public void OnClick()
     {
-        // Ô¤Áô£ºµã»÷¿¨²Û½»»»¿¨ÅÆ
-        Debug.Log($"µã»÷¿¨²Û {slotIndex}, µ±Ç°¿¨ÅÆ: {currentCard?.cardName ?? "¿Õ"}");
+        // Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        Debug.Log($"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ {slotIndex}, ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½: {currentCard?.cardName ?? "ï¿½ï¿½"}");
     }
 
-    // ÒÆ³ı³·»Ø·½·¨µÄµ÷ÓÃ£¨ÏÈ×¢ÊÍµô£¬µÈBattleManagerÊµÏÖÁËÔÙ¼Ó£©
+    // ï¿½Æ³ï¿½ï¿½ï¿½ï¿½Ø·ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½Ã£ï¿½ï¿½ï¿½×¢ï¿½Íµï¿½ï¿½ï¿½ï¿½ï¿½BattleManagerÊµï¿½ï¿½ï¿½ï¿½ï¿½Ù¼Ó£ï¿½
     /*
     void WithdrawCard()
     {
         if (BattleManager.Instance != null)
         {
-            // µÈ´ıBattleManagerÊµÏÖÕâ¸ö·½·¨
+            // ï¿½È´ï¿½BattleManagerÊµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             BattleManager.Instance.WithdrawCardFromSlot(ownerCharacter, slotIndex, currentCard);
             ClearCard();
         }

@@ -2,9 +2,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
+[RequireComponent(typeof(CardDragHandler))]
 public class CardButtonUI : MonoBehaviour
 {
-    [Header("UI×é¼ş")]
+    public bool isHandCard = true; // é»˜è®¤ä¸ºæ‰‹ç‰Œå¡
+    private bool isSelectedForDiscard = false;
+    [Header("UIç»„ä»¶")]
     [SerializeField] private Image cardBackground;
     [SerializeField] private Text cardNameText;
     [SerializeField] private Text cardCostText;
@@ -20,10 +23,10 @@ public class CardButtonUI : MonoBehaviour
         onClickCallback = callback;
 
         cardNameText.text = data.cardName;
-        cardCostText.text = $"ÏûºÄ:{data.cost}";
+        cardCostText.text = $"è´¹ç”¨:{data.cost}";
         cardTypeText.text = GetCardTypeString(data.cardType);
 
-        // ÉèÖÃ±³¾°ÑÕÉ«
+        // è®¾ç½®èƒŒæ™¯é¢œè‰²
         cardBackground.color = data.cardColor;
 
         button.onClick.RemoveAllListeners();
@@ -34,22 +37,40 @@ public class CardButtonUI : MonoBehaviour
     {
         switch (type)
         {
-            case CardType.Attack: return "¹¥»÷";
-            case CardType.Defense: return "·ÀÓù";
-            case CardType.Heal: return "ÖÎÁÆ";
-            case CardType.Status: return "×´Ì¬";
-            case CardType.Buff: return "ÔöÒæ";
-            case CardType.Special: return "ÌØÊâ";
-            default: return "Î´Öª";
+            case CardType.Attack: return "æ”»å‡»";
+            case CardType.Defense: return "é˜²å¾¡";
+            case CardType.Heal: return "æ²»ç–—";
+            case CardType.Status: return "çŠ¶æ€";
+            case CardType.Buff: return "å¢ç›Š";
+            case CardType.Special: return "ç‰¹æ®Š";
+            default: return "æœªçŸ¥";
         }
+    }
+
+    public void ToggleSelectionForDiscard()
+    {
+        isSelectedForDiscard = !isSelectedForDiscard;
+        // Update visual state (e.g., change color, show an icon)
+        GetComponent<Image>().color = isSelectedForDiscard ? Color.yellow : Color.white;
     }
 
     void OnButtonClicked()
     {
-        onClickCallback?.Invoke(cardData);
+        if (CardConsumptionUI.Instance.IsConsumptionPanelActive)
+        {
+            CardConsumptionUI.Instance.SelectCardForDiscard(cardData);
+            ToggleSelectionForDiscard();
+        }
+        else
+        {
+            if (isHandCard)
+            {
+                onClickCallback?.Invoke(cardData);
+            }
+        }
     }
 
-    public CardData GetCard()
+    public CardData GetCardData()
     {
         return cardData;
     }

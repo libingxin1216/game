@@ -1,72 +1,81 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems; // Ìí¼ÓÕâĞĞ
+using UnityEngine.EventSystems; // å¼•å…¥äº‹ä»¶ç³»ç»Ÿ
 using System.Collections;
 
-public class CharacterBattleUI : MonoBehaviour, IPointerClickHandler // Ìí¼Ó½Ó¿Ú
+public class CharacterBattleUI : MonoBehaviour, IPointerClickHandler // å®ç°æ¥å£
 {
-    [Header("UI×é¼ş")]
+    [Header("UIå…ƒç´ ")]
     [SerializeField] private Image characterAvatar;
     [SerializeField] private Text characterNameText;
     [SerializeField] private Slider healthSlider;
     [SerializeField] private Text healthText;
     [SerializeField] private Button selectButton;
 
-    [Header("¸ßÁÁĞ§¹û")]
+    [Header("é«˜äº®æ•ˆæœ")]
     [SerializeField] private Image highlightBorder;
     [SerializeField] private Color validHighlightColor = Color.green;
     [SerializeField] private Color invalidHighlightColor = Color.red;
 
-    [Header("ÑÕÉ«")]
+    [Header("é¢œè‰²")]
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color deadColor = Color.gray;
 
-    [Header("Ä¿±êÑ¡Ôñ")]
-    [SerializeField] private Image targetSelectableBorder; // ¿ÉÑ¡Ä¿±ê±ß¿ò
+    [Header("ç›®æ ‡é€‰æ‹©")]
+    [SerializeField] private Image targetSelectableBorder; // å¯é€‰ç›®æ ‡è¾¹æ¡†
     [SerializeField] private Color targetSelectableColor = Color.red;
     [SerializeField] private Color targetSelectedColor = Color.green;
 
-    [Header("×´Ì¬ÏÔÊ¾")]
+    [Header("çŠ¶æ€æ˜¾ç¤º")]
     public Transform statusEffectsContainer;
     public GameObject statusEffectIconPrefab;
 
-    // Ë½ÓĞ×Ö¶Î
+    // ç§æœ‰å­—æ®µ
     [SerializeField] private CharacterData _characterData;
     private bool isPlayer;
 
-    // ¹«¹²ÊôĞÔ
-    public CharacterData CharacterData
+    // å…¬å…±å±æ€§
+    public CharacterData characterData
     {
         get { return _characterData; }
         private set { _characterData = value; }
     }
 
-    [Header("¿¨²ÛÒıÓÃ")]
+    // æ–¹ä¾¿å¤–éƒ¨è®¿é—®
+    public CharacterData GetCharacterData()
+    {
+        return characterData;
+    }
+
+    [Header("å¡ç‰Œæ§½")]
     public CardSlotUI[] cardSlots = new CardSlotUI[3];
 
-    // Ìí¼ÓÒ»¸ö×Ö¶Î±êÊ¶ÊÇ·ñÊÇÍæ¼Ò½ÇÉ«
+    [Header("ç›®æ ‡é€‰æ‹©å™¨")]
+    public TargetSelector targetSelector;
+
+    // ä¸€ä¸ªå­—æ®µæ ‡è¯†æ˜¯å¦ä¸ºç©å®¶è§’è‰²
     private bool isPlayerCharacter;
 
     public void Initialize(CharacterData data, bool isPlayerSide)
     {
-        CharacterData = data;
-        isPlayerCharacter = isPlayerSide; // ±£´æÕâ¸öĞÅÏ¢
+        characterData = data;
+        isPlayerCharacter = isPlayerSide; // è®¾ç½®é˜µè¥ä¿¡æ¯
 
-        Debug.Log($"³õÊ¼»¯½ÇÉ«UI: {data.characterName}");
+        Debug.Log($"åˆå§‹åŒ–è§’è‰²UI: {data.characterName}");
 
-        CharacterData = data;
+        characterData = data;
         isPlayer = isPlayerSide;
 
-        // ÉèÖÃ»ù±¾ĞÅÏ¢
+        // è®¾ç½®åç§°
         if (characterNameText != null)
             characterNameText.text = data.characterName;
 
-        // ÉèÖÃÍ·ÏñÑÕÉ«
+        // è®¾ç½®å¤´åƒé¢œè‰²
         if (characterAvatar != null)
         {
             characterAvatar.color = data.characterColor;
 
-            // Èç¹ûÊÇµĞÈË£¬±ä°µÒ»µã
+            // å¦‚æœæ˜¯æ•Œäººï¼Œæš—ä¸€ç‚¹
             if (!isPlayer)
             {
                 characterAvatar.color *= 0.7f;
@@ -79,52 +88,53 @@ public class CharacterBattleUI : MonoBehaviour, IPointerClickHandler // Ìí¼Ó½Ó¿Ú
 
             if (isPlayerSide)
             {
-                // Íæ¼Ò½ÇÉ«£ºÏÔÊ¾ÊÖÅÆ
+                // æˆ‘æ–¹è§’è‰²ï¼Œç‚¹å‡»åæ˜¾ç¤ºæ‰‹ç‰Œ
                 selectButton.onClick.AddListener(OnPlayerCharacterClicked);
-                Debug.Log($"ÎªÍæ¼Ò½ÇÉ« {data.characterName} ÉèÖÃÊÖÅÆÏÔÊ¾ÊÂ¼ş");
+                Debug.Log($"ä¸ºæˆ‘æ–¹è§’è‰² {data.characterName} ç»‘å®šæ‰‹ç‰Œæ˜¾ç¤ºäº‹ä»¶");
             }
             else
             {
-                // µĞÈË½ÇÉ«£º×÷ÎªÄ¿±êÑ¡Ôñ
+                // æ•Œæ–¹è§’è‰²ï¼Œç‚¹å‡»åä½œä¸ºç›®æ ‡é€‰æ‹©
                 selectButton.onClick.AddListener(OnEnemyCharacterClicked);
-                Debug.Log($"ÎªµĞÈË½ÇÉ« {data.characterName} ÉèÖÃÄ¿±êÑ¡ÔñÊÂ¼ş");
+                Debug.Log($"ä¸ºæ•Œæ–¹è§’è‰² {data.characterName} ç»‘å®šç›®æ ‡é€‰æ‹©äº‹ä»¶");
             }
         }
         UpdateUI();
         InitializeCardSlots();
+        InitializeTargetSelector();
     }
 
     void InitializeCardSlots()
     {
-        // ×Ô¶¯²éÕÒ×Ó¶ÔÏóÖĞµÄ¿¨²Û
+        // è‡ªåŠ¨æŸ¥æ‰¾å­å¯¹è±¡ä¸­çš„å¡æ§½
         cardSlots = GetComponentsInChildren<CardSlotUI>();
 
-        // °´Ë³ĞòÅÅĞò£¨È·±£Ë³ĞòÕıÈ·£©
+        // æŒ‰é¡ºåºæ’åºä»¥ç¡®ä¿é¡ºåºæ­£ç¡®
         System.Array.Sort(cardSlots, (a, b) => a.slotIndex.CompareTo(b.slotIndex));
 
-        Debug.Log($"Îª {CharacterData.characterName} ÕÒµ½ {cardSlots.Length} ¸ö¿¨²Û");
+        Debug.Log($"ä¸º {characterData.characterName} æ‰¾åˆ° {cardSlots.Length} ä¸ªå¡æ§½");
     }
 
     public void UpdateUI()
     {
-        if (CharacterData == null) return;
+        if (characterData == null) return;
 
-        // ¸üĞÂÉúÃüÖµÏÔÊ¾
+        // æ›´æ–°ç”Ÿå‘½å€¼æ˜¾ç¤º
         if (healthSlider != null)
         {
-            float healthPercent = (float)CharacterData.currentHealth / CharacterData.maxHealth;
+            float healthPercent = (float)characterData.currentHealth / characterData.maxHealth;
             healthSlider.value = healthPercent;
         }
 
         if (healthText != null)
         {
-            healthText.text = $"{CharacterData.currentHealth}/{CharacterData.maxHealth}";
+            healthText.text = $"{characterData.currentHealth}/{characterData.maxHealth}";
         }
 
-        // Èç¹û½ÇÉ«ËÀÍö£¬±ä»Ò
+        // æ›´æ–°è§’è‰²å­˜æ´»çŠ¶æ€
         if (characterAvatar != null)
         {
-            if (CharacterData.isDead)
+            if (characterData.isDead)
             {
                 characterAvatar.color = deadColor;
                 if (selectButton != null)
@@ -138,19 +148,19 @@ public class CharacterBattleUI : MonoBehaviour, IPointerClickHandler // Ìí¼Ó½Ó¿Ú
         }
     }
 
-    // ¸üĞÂ×´Ì¬ÏÔÊ¾
+    // æ›´æ–°çŠ¶æ€æ˜¾ç¤º
     public void UpdateStatusEffects()
     {
-        if (CharacterData == null) return;
+        if (characterData == null) return;
 
-        // Çå¿ÕÏÖÓĞ×´Ì¬Í¼±ê
+        // æ¸…ç†æ—§çš„çŠ¶æ€å›¾æ ‡
         foreach (Transform child in statusEffectsContainer)
         {
             Destroy(child.gameObject);
         }
 
-        // ÏÔÊ¾ËùÓĞ×´Ì¬
-        foreach (var status in CharacterData.statusEffects)
+        // æ˜¾ç¤ºå½“å‰çŠ¶æ€
+        foreach (var status in characterData.statusEffects)
         {
             if (status.stacks <= 0) continue;
 
@@ -169,7 +179,7 @@ public class CharacterBattleUI : MonoBehaviour, IPointerClickHandler // Ìí¼Ó½Ó¿Ú
                 stackText.text = status.stacks.ToString();
             }
 
-            // Ìí¼ÓĞüÍ£ÌáÊ¾
+            // é¼ æ ‡æ‚¬åœæç¤º
             StatusIconTooltip tooltip = iconObj.GetComponent<StatusIconTooltip>();
             if (tooltip == null)
             {
@@ -181,48 +191,48 @@ public class CharacterBattleUI : MonoBehaviour, IPointerClickHandler // Ìí¼Ó½Ó¿Ú
 
     void OnPlayerCharacterClicked()
     {
-        if (CharacterData == null || CharacterData.isDead) return;
+        if (characterData == null || characterData.isDead) return;
 
-        Debug.Log($"µã»÷Ñ¡Ôñ½ÇÉ«: {CharacterData.characterName}");
+        Debug.Log($"ç‚¹å‡»é€‰æ‹©è§’è‰²: {characterData.characterName}");
 
-        // Í¨ÖªBattleManagerÑ¡ÖĞÕâ¸ö½ÇÉ«
+        // é€šçŸ¥BattleManageré€‰æ‹©äº†å“ªä¸ªè§’è‰²
         if (BattleManager.Instance != null)
         {
-            BattleManager.Instance.SelectCharacter(CharacterData);
+            BattleManager.Instance.SelectCharacter(characterData);
         }
     }
 
-    // µĞÈË½ÇÉ«±»µã»÷£¨×÷ÎªÄ¿±ê£©
+    // æ•Œæ–¹è§’è‰²è¢«ç‚¹å‡»ï¼ˆä½œä¸ºç›®æ ‡ï¼‰
     void OnEnemyCharacterClicked()
     {
-        if (CharacterData == null || CharacterData.isDead) return;
+        if (characterData == null || characterData.isDead) return;
 
-        Debug.Log($"µã»÷µĞÈË×÷ÎªÄ¿±ê: {CharacterData.characterName}");
+        Debug.Log($"ç‚¹å‡»æ•Œæ–¹ä½œä¸ºç›®æ ‡: {characterData.characterName}");
 
-        // ¼ì²éÊÇ·ñÔÚÄ¿±êÑ¡ÔñÄ£Ê½ÏÂ
+        // æ£€æŸ¥æ˜¯å¦åœ¨ç›®æ ‡é€‰æ‹©æ¨¡å¼ä¸‹
         if (BattleManager.Instance != null)
         {
-            if (BattleManager.Instance.isSelectingTarget)
+            if (BattleManager.Instance.IsSelectingTarget())
             {
-                // ÔÚÄ¿±êÑ¡ÔñÄ£Ê½ÏÂ£¬µã»÷µĞÈËÑ¡ÔñÎªÄ¿±ê
-                BattleManager.Instance.SelectTarget(CharacterData);
+                // åœ¨ç›®æ ‡é€‰æ‹©æ¨¡å¼ä¸‹ï¼Œå°†æ­¤é€‰æ‹©ä¸ºç›®æ ‡
+                BattleManager.Instance.SelectTarget(characterData);
             }
             else
             {
-                // ²»ÔÚÄ¿±êÑ¡ÔñÄ£Ê½ÏÂ£¬ÏÔÊ¾ÌáÊ¾
-                Debug.Log($"µã»÷ÁËµĞÈË£¬µ«µ±Ç°²»ÔÚÄ¿±êÑ¡ÔñÄ£Ê½");
+                // éç›®æ ‡é€‰æ‹©æ¨¡å¼ä¸‹ï¼Œæ˜¾ç¤ºæç¤º
+                Debug.Log($"ç‚¹å‡»äº†æ•Œäººï¼Œä½†å½“å‰éç›®æ ‡é€‰æ‹©æ¨¡å¼");
             }
         }
     }
 
-    // ÉèÖÃ¿É±»Ñ¡ÎªÄ¿±êµÄ×´Ì¬
+    // è®¾ç½®å¯è¢«é€‰ä¸ºç›®æ ‡çš„çŠ¶æ€
     public void SetTargetSelectable(bool selectable)
     {
-        Debug.Log($"ÉèÖÃ {CharacterData.characterName} ¿ÉÑ¡×´Ì¬: {selectable}");
+        Debug.Log($"è®¾ç½® {characterData.characterName} çš„å¯é€‰ç›®æ ‡çŠ¶æ€: {selectable}");
 
         if (targetSelectableBorder == null)
         {
-            Debug.LogWarning($"½ÇÉ« {CharacterData.characterName} Ã»ÓĞÄ¿±ê±ß¿ò");
+            Debug.LogWarning($"è§’è‰² {characterData.characterName} æ²¡æœ‰ç›®æ ‡è¾¹æ¡†");
             return;
         }
 
@@ -232,18 +242,18 @@ public class CharacterBattleUI : MonoBehaviour, IPointerClickHandler // Ìí¼Ó½Ó¿Ú
         {
             targetSelectableBorder.color = targetSelectableColor;
 
-            // Ìí¼ÓÉÁË¸Ğ§¹û
+            // å¼€å¯é—ªçƒæ•ˆæœ
             StartCoroutine(BlinkTargetBorder());
-            Debug.Log($"¿ªÊ¼ÉÁË¸: {CharacterData.characterName}");
+            Debug.Log($"å¼€å§‹é—ªçƒ: {characterData.characterName}");
         }
         else
         {
             StopAllCoroutines();
-            Debug.Log($"Í£Ö¹ÉÁË¸: {CharacterData.characterName}");
+            Debug.Log($"åœæ­¢é—ªçƒ: {characterData.characterName}");
         }
     }
 
-    // ÉÁË¸Ğ§¹û
+    // é—ªçƒæ•ˆæœ
     IEnumerator BlinkTargetBorder()
     {
         while (targetSelectableBorder.gameObject.activeSelf)
@@ -257,7 +267,7 @@ public class CharacterBattleUI : MonoBehaviour, IPointerClickHandler // Ìí¼Ó½Ó¿Ú
         }
     }
 
-    // ÉèÖÃÒÑ±»Ñ¡ÖĞÎªÄ¿±êµÄÑùÊ½
+    // è®¾ç½®å·²è¢«é€‰ä¸ºç›®æ ‡çš„æ ·å¼
     public void SetAsSelectedTarget(bool selected)
     {
         if (targetSelectableBorder == null) return;
@@ -267,35 +277,43 @@ public class CharacterBattleUI : MonoBehaviour, IPointerClickHandler // Ìí¼Ó½Ó¿Ú
         if (selected)
         {
             targetSelectableBorder.color = targetSelectedColor;
-            StopAllCoroutines(); // Í£Ö¹ÉÁË¸
+            StopAllCoroutines(); // åœæ­¢é—ªçƒ
         }
     }
 
-    // ÊµÏÖIPointerClickHandler½Ó¿Ú
+    void InitializeTargetSelector()
+    {
+        if (targetSelector != null)
+        {
+            targetSelector.owner = this;
+        }
+    }
+
+    // å®ç°IPointerClickHandleræ¥å£
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button != PointerEventData.InputButton.Left) return;
 
-        if (CharacterData == null || CharacterData.isDead) return;
+        if (characterData == null || characterData.isDead) return;
 
-        Debug.Log($"µã»÷½ÇÉ«: {CharacterData.characterName}");
+        Debug.Log($"ç‚¹å‡»äº†è§’è‰²: {characterData.characterName}");
 
-        // Èç¹ûÕıÔÚÑ¡ÔñÄ¿±ê£¬´¦ÀíÄ¿±êÑ¡Ôñ
+        // å¦‚æœæ­£åœ¨é€‰æ‹©ç›®æ ‡ï¼Œåˆ™å“åº”ç›®æ ‡é€‰æ‹©
         if (BattleManager.Instance != null && BattleManager.Instance.IsSelectingTarget())
         {
-            BattleManager.Instance.OnCharacterClickedAsTarget(CharacterData);
+            BattleManager.Instance.OnCharacterClickedAsTarget(characterData);
         }
         else
         {
-            // Õı³£µã»÷Ñ¡Ôñ½ÇÉ«£¨ÏÔÊ¾ÊÖÅÆ£©
-            if (BattleManager.Instance != null)
+            // å¦åˆ™ï¼Œå°±æ˜¯é€‰æ‹©è§’è‰²ä»¥æ˜¾ç¤ºæ‰‹ç‰Œ
+            if (isPlayerCharacter && BattleManager.Instance != null)
             {
-                BattleManager.Instance.SelectCharacter(CharacterData);
+                BattleManager.Instance.SelectCharacter(characterData);
             }
         }
     }
 
-    // Ìí¼ÓÕâ¸ö·½·¨
+    // è·å–å¡ç‰Œæ§½
     public CardSlotUI GetCardSlot(int index)
     {
         if (index >= 0 && index < cardSlots.Length)
@@ -304,18 +322,4 @@ public class CharacterBattleUI : MonoBehaviour, IPointerClickHandler // Ìí¼Ó½Ó¿Ú
         }
         return null;
     }
-
-    public void SetHighlight(bool highlight, bool isValid)
-    {
-        if (highlightBorder == null) return;
-
-        highlightBorder.gameObject.SetActive(highlight);
-
-        if (highlight)
-        {
-            highlightBorder.color = isValid ? validHighlightColor : invalidHighlightColor;
-        }
-    }
-
-
 }

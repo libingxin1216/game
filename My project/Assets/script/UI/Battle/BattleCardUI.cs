@@ -4,19 +4,21 @@ using UnityEngine.EventSystems;
 
 public class BattleCardUI : MonoBehaviour, IPointerClickHandler
 {
-    [Header("¿¨ÅÆÊı¾İ")]
+    [Header("")]
     public CardData cardData;
     public CharacterData ownerCharacter;
 
-    [Header("UI×é¼ş")]
+    [Header("UI")]
     public Image cardBackground;
     public Text cardNameText;
     public Text cardCostText;
     public Text cardDescriptionText;
 
-    [Header("µã»÷Ğ§¹û")]
+    [Header("Ğ§")]
     public Color normalColor = Color.white;
     public Color selectedColor = Color.yellow;
+    public Color canBeDiscardedColor = Color.green; // å¯ä»¥è¢«ä¸¢å¼ƒçš„å¡ç‰Œé¢œè‰²
+    public Color selectedForDiscardColor = Color.blue; // è¢«é€‰ä¸­ç”¨äºä¸¢å¼ƒçš„å¡ç‰Œé¢œè‰²
 
     private bool isSelected = false;
 
@@ -33,7 +35,7 @@ public class BattleCardUI : MonoBehaviour, IPointerClickHandler
             cardNameText.text = cardData.cardName;
 
         if (cardCostText != null)
-            cardCostText.text = $"ÏûºÄ:{cardData.cost}";
+            cardCostText.text = $":{cardData.cost}";
 
         if (cardDescriptionText != null)
             cardDescriptionText.text = cardData.description;
@@ -41,10 +43,10 @@ public class BattleCardUI : MonoBehaviour, IPointerClickHandler
         if (cardBackground != null)
         {
             cardBackground.color = cardData.cardColor;
-            cardBackground.raycastTarget = true; // È·±£¿ÉÒÔµã»÷
+            cardBackground.raycastTarget = true; // È·Ôµ
         }
 
-        // È·±£ËùÓĞÎÄ±¾¶¼¿ÉÒÔµã»÷£¨Èç¹ûĞèÒª£©
+        // È·Ä±ÔµÒª
         Graphic[] graphics = GetComponentsInChildren<Graphic>();
         foreach (var graphic in graphics)
         {
@@ -57,75 +59,76 @@ public class BattleCardUI : MonoBehaviour, IPointerClickHandler
         cardData = data;
         ownerCharacter = owner;
 
-        Debug.Log($"³õÊ¼»¯¿¨ÅÆ: {data.cardName}, ËùÓĞÕß: {owner.characterName}");
+        Debug.Log($"Ê¼: {data.cardName}, : {owner.characterName}");
 
         InitializeDisplay();
     }
 
-    // µã»÷¿¨ÅÆ
+    // 
     public void OnPointerClick(PointerEventData eventData)
     {
+        // å¦‚æœåœ¨å¼ƒç‰Œæ¨¡å¼ä¸‹ï¼Œç‚¹å‡»å¡ç‰Œæ˜¯ç”¨äºé€‰æ‹©å¼ƒç‰Œ
+        if (BattleManager.Instance != null && (BattleManager.Instance.IsInDiscardMode || (CardConsumptionUI.Instance != null && CardConsumptionUI.Instance.IsConsumptionPanelActive)))
+        {
+            BattleManager.Instance.OnCardSelectedForDiscard(cardData);
+            return;
+        }
+
+        // æ­£å¸¸ç‚¹å‡»å¡ç‰Œçš„é€»è¾‘
         if (ownerCharacter == null || ownerCharacter.isDead)
         {
-            Debug.LogWarning("ËùÓĞÕßÎŞĞ§»òÒÑËÀÍö£¬ÎŞ·¨Ê¹ÓÃ¿¨ÅÆ");
+            Debug.LogWarning("è§’è‰²å·²æ­»äº¡æˆ–æ— æ•ˆï¼Œæ— æ³•ä½¿ç”¨å¡ç‰Œ");
             return;
         }
 
         if (CardSelectionSystem.Instance != null && CardSelectionSystem.Instance.IsSelecting())
         {
-            Debug.Log("ÕıÔÚÑ¡Ôñ¿¨²ÛÖĞ£¬²»ÄÜÑ¡ÔñĞÂ¿¨ÅÆ");
+            Debug.Log("æ­£åœ¨é€‰æ‹©å¡æ§½ï¼Œæ— æ³•é€‰æ‹©æ–°å¡ç‰Œ");
             return;
         }
 
-        Debug.Log($"µã»÷¿¨ÅÆ: {cardData.cardName}");
+        Debug.Log($"ç‚¹å‡»äº†å¡ç‰Œ: {cardData.cardName}");
 
-        // ÏÔÊ¾¿¨ÅÆ±»Ñ¡ÖĞĞ§¹û
+        // æ˜¾ç¤ºè¢«é€‰ä¸­çš„è§†è§‰æ•ˆæœ
         SetSelected(true);
 
-        // ÏÔÊ¾¿¨²ÛÑ¡ÔñÃæ°å
+        // æ˜¾ç¤ºå¡æ§½é€‰æ‹©
         ShowSlotSelection();
     }
 
-    // ÏÔÊ¾¿¨²ÛÑ¡Ôñ
+    // Ê¾Ñ¡
     void ShowSlotSelection()
     {
         if (ownerCharacter == null) return;
 
-        // Ö»ÄÜÑ¡Ôñµ±Ç°½ÇÉ«µÄ¿¨²Û
+        // Ö»Ñ¡Ç°É«Ä¿
         if (CardSelectionSystem.Instance != null)
         {
             CardSelectionSystem.Instance.ShowSlotSelection(
                 cardData,
                 ownerCharacter,
-                ownerCharacter, // Ä¿±ê½ÇÉ«ÊÇ×Ô¼º
+                ownerCharacter, // Ä¿É«Ô¼
                 OnCardSlotSelected
             );
         }
     }
 
-    // ¿¨²ÛÑ¡Ôñ»Øµ÷
+    // Ñ¡Øµ
     void OnCardSlotSelected(CardData card, CharacterData target, int slotIndex)
     {
-        Debug.Log($"¿¨²ÛÑ¡Ôñ»Øµ÷: {card.cardName} -> {target.characterName} µÄ¿¨²Û {slotIndex}");
+        Debug.Log($"Ñ¡Øµ: {card.cardName} -> {target.characterName} Ä¿ {slotIndex}");
 
-        // ÒÆ³ıÑ¡ÖĞĞ§¹û
+        // Æ³Ñ¡Ğ§
         SetSelected(false);
 
-        // ·ÅÖÃ¿¨ÅÆµ½¿¨²Û
+        // Ã¿Æµ
         if (BattleManager.Instance != null)
         {
-            BattleManager.Instance.PlaceCardInSlot(card, target, slotIndex);
-
-            // ´ÓÊÖÅÆÖĞÒÆ³ı£¨¿¨ÅÆUI»á±»Ïú»Ù£©
-            if (ownerCharacter.handCards.Contains(card))
-            {
-                ownerCharacter.handCards.Remove(card);
-                Destroy(gameObject);
-            }
+            BattleManager.Instance.AttemptToPlaceCard(card, target, slotIndex);
         }
     }
 
-    // ÉèÖÃÑ¡ÖĞ×´Ì¬
+    // Ñ¡×´Ì¬
     public void SetSelected(bool selected)
     {
         isSelected = selected;
@@ -136,7 +139,7 @@ public class BattleCardUI : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // Êó±êĞüÍ£Ğ§¹û
+    // Í£Ğ§
     public void OnPointerEnter()
     {
         if (cardBackground != null && !isSelected)
@@ -150,6 +153,25 @@ public class BattleCardUI : MonoBehaviour, IPointerClickHandler
         if (cardBackground != null && !isSelected)
         {
             cardBackground.color = cardData.cardColor;
+        }
+    }
+    
+    public void SetHighlight(bool canBeDiscarded, bool isSelectedForDiscard)
+    {
+        if (cardBackground == null) return;
+
+        if (isSelectedForDiscard)
+        {
+            cardBackground.color = selectedForDiscardColor;
+        }
+        else if (canBeDiscarded)
+        {
+            cardBackground.color = canBeDiscardedColor;
+        }
+        else
+        {
+            // Restore original color, considering if it's selected for play
+            cardBackground.color = isSelected ? selectedColor : cardData.cardColor;
         }
     }
 

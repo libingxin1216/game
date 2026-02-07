@@ -347,12 +347,17 @@ MonoBehaviour:
   cardData:
     cardId: 
     cardName: 
-    cost: 0
+    cost: 1
     description: 
     cardType: 0
     characterClass: 0
     cardColor: {r: 0, g: 0, b: 0, a: 0}
     effects: []
+    requiresTarget: 0
+    consumptionRequirements:
+    - consumptionType: 0
+      requiredCount: 1
+      requiredCardType: 0
   ownerCharacter:
     characterId: 
     characterName: 
@@ -375,6 +380,8 @@ MonoBehaviour:
   cardDescriptionText: {fileID: 5962942023327201899}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  canBeDiscardedColor: {r: 0, g: 1, b: 0, a: 1}
+  selectedForDiscardColor: {r: 0, g: 0, b: 1, a: 1}
 --- !u!114 &7683685759812648547
 MonoBehaviour:
   m_ObjectHideFlags: 0

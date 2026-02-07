@@ -3,7 +3,8 @@ using UnityEngine.UI;
 
 public class CardButtonHandler : MonoBehaviour
 {
-    public int cardIndex = 0;
+    public CardData cardData;
+    public CharacterData ownerCharacter; // æ·»åŠ æ‹¥æœ‰è€…è§’è‰²
     private Button button;
 
     void Start()
@@ -15,20 +16,41 @@ public class CardButtonHandler : MonoBehaviour
         }
         else
         {
-            Debug.LogError("°´Å¥×é¼ş²»´æÔÚ£¡");
+            Debug.LogError("ï¿½ï¿½Å¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú£ï¿½");
         }
     }
 
     public void OnCardClicked()
     {
-        Debug.Log($"¿¨ÅÆ°´Å¥±»µã»÷£¬Ë÷Òı: {cardIndex}");
-        if (CardGameManager.Instance != null)
+        if (cardData == null) return;
+
+        Debug.Log($"ç‚¹å‡»äº†å¡ç‰ŒæŒ‰é’®: {cardData.cardName}");
+
+        ShowSlotSelection();
+    }
+
+    void ShowSlotSelection()
+    {
+        if (ownerCharacter == null) return;
+
+        if (CardSelectionSystem.Instance != null)
         {
-            CardGameManager.Instance.PlayCard(cardIndex);
+            CardSelectionSystem.Instance.ShowSlotSelection(
+                cardData,
+                ownerCharacter,
+                ownerCharacter, 
+                OnCardSlotSelected
+            );
         }
-        else
+    }
+
+    void OnCardSlotSelected(CardData card, CharacterData target, int slotIndex)
+    {
+        Debug.Log($"é€‰æ‹©äº†å¡æ§½: {card.cardName} -> {target.characterName} çš„å¡æ§½ {slotIndex}");
+
+        if (BattleManager.Instance != null)
         {
-            Debug.LogError("CardGameManagerµÄInstanceÎª¿Õ£¡");
+            BattleManager.Instance.AttemptToPlaceCard(card, target, slotIndex);
         }
     }
 }

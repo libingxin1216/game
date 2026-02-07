@@ -1,9 +1,5 @@
 sceneSetups:
-<<<<<<< HEAD
-- path: Assets/Scenes/Waypoint.unity
-=======
-- path: Assets/Scenes/MainMenu.unity
->>>>>>> eab2a388bd1f9ae7ed69985efe5c1c5ae6c8f2f7
+- path: Assets/Scenes/Battle.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

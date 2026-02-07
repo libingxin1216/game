@@ -4,24 +4,24 @@ using UnityEngine;
 [System.Serializable]
 public class BattleData
 {
-    // Õ½¶·Ë«·½
+    // æˆ˜æ–—åŒæ–¹
     public List<CharacterData> playerTeam = new List<CharacterData>();
     public List<CharacterData> enemyTeam = new List<CharacterData>();
 
-    // µ±Ç°»ØºÏĞÅÏ¢
+    // å½“å‰å›åˆä¿¡æ¯
     public bool isPlayerTurn = true;
     public int currentTurn = 1;
 
-    // µ±Ç°²Ù×÷µÄ½ÇÉ«Ë÷Òı
+    // å½“å‰æ¿€æ´»çš„è§’è‰²ç´¢å¼•
     public int currentPlayerCharacterIndex = 0;
     public int currentTargetCharacterIndex = -1;
 
-    // ¿¨²ÛÊı¾İ
+    // å¡ç‰Œæ§½ä½
     public class CharacterCardSlots
     {
         public CharacterData character;
-        public CardData[] slots = new CardData[3]; // 3¸ö¿¨²Û
-        public CharacterData target; // Ä¿±ê½ÇÉ«
+        public CardData[] slots = new CardData[3]; // 3ä¸ªå¡æ§½
+        public CharacterData target; // ç›®æ ‡è§’è‰²
 
         public bool HasCardInSlot(int slotIndex)
         {
@@ -46,6 +46,12 @@ public class BattleData
             return true;
         }
 
+        // æ˜¯å¦å‡†å¤‡å¥½æ¿€æ´»
+        public bool IsReadyToActivate()
+        {
+            return IsAllSlotsOccupied();
+        }
+
         public void ClearSlots()
         {
             for (int i = 0; i < slots.Length; i++)
@@ -54,12 +60,17 @@ public class BattleData
             }
             target = null;
         }
+
+        public void Clear()
+        {
+            ClearSlots();
+        }
     }
 
     public Dictionary<CharacterData, CharacterCardSlots> characterSlots =
         new Dictionary<CharacterData, CharacterCardSlots>();
 
-    // ³õÊ¼»¯Õ½¶·
+    // åˆå§‹åŒ–æˆ˜æ–—
     public void Initialize(List<CharacterData> playerTeam, List<CharacterData> enemyTeam)
     {
         this.playerTeam = playerTeam;
@@ -68,7 +79,7 @@ public class BattleData
         isPlayerTurn = true;
         currentTurn = 1;
 
-        // ÎªÃ¿¸ö½ÇÉ«³õÊ¼»¯¿¨²Û
+        // ä¸ºæ¯ä¸ªè§’è‰²åˆå§‹åŒ–å¡æ§½
         characterSlots.Clear();
         foreach (var character in playerTeam)
         {
@@ -80,7 +91,7 @@ public class BattleData
         }
     }
 
-    // ¼ì²éÕ½¶·ÊÇ·ñ½áÊø
+    // æ£€æŸ¥æˆ˜æ–—æ˜¯å¦ç»“æŸ
     public bool IsBattleOver()
     {
         bool allPlayersDead = true;
@@ -99,7 +110,7 @@ public class BattleData
         return allPlayersDead || allEnemiesDead;
     }
 
-    // »ñÈ¡Ê¤Àû·½
+    // è·å–èƒœåˆ©æ–¹
     public string GetWinner()
     {
         bool allPlayersDead = true;

@@ -5,9 +5,9 @@ using UnityEngine.UI;
 
 public class CardEffectExecutor : MonoBehaviour
 {
-    public static CardEffectExecutor Instance { get; private set; }
+    public static CardEffectExecutor Instance;
 
-    [Header("ÌØĞ§")]
+    [Header("ç‰¹æ•ˆ")]
     public GameObject damageEffectPrefab;
     public GameObject healEffectPrefab;
     public GameObject shieldEffectPrefab;
@@ -25,204 +25,204 @@ public class CardEffectExecutor : MonoBehaviour
         }
     }
 
-    // Ö´ĞĞ¿¨ÅÆĞ§¹û
+    // æ‰§è¡Œå¡ç‰Œæ•ˆæœ
     public IEnumerator ExecuteCardEffects(CardData card, CharacterData caster, CharacterData target, BattleData battleData)
     {
-        Debug.Log($"Ö´ĞĞ¿¨ÅÆĞ§¹û: {card.cardName}, Ê©·¨Õß: {caster.characterName}, Ä¿±ê: {target?.characterName ?? "ÎŞ"}");
+        Debug.Log($"æ‰§è¡Œå¡ç‰Œæ•ˆæœ: {card.cardName}, æ–½æ³•è€…: {caster.characterName}, ç›®æ ‡: {target?.characterName ?? "æ— "}");
 
-        // ±éÀúËùÓĞĞ§¹û
+        // éå†æ‰€æœ‰æ•ˆæœ
         foreach (var effect in card.effects)
         {
             yield return ExecuteSingleEffect(effect, card, caster, target, battleData);
-            yield return new WaitForSeconds(0.3f); // Ğ§¹û¼ä¸ô
+            yield return new WaitForSeconds(0.3f); // æ•ˆæœé—´éš”
         }
     }
 
-    // Ö´ĞĞµ¥¸öĞ§¹û
+    // æ‰§è¡Œå•ä¸ªæ•ˆæœ
     IEnumerator ExecuteSingleEffect(CardEffect effect, CardData card, CharacterData caster, CharacterData target, BattleData battleData)
     {
-        Debug.Log($"Ö´ĞĞĞ§¹û: {effect.effectName}, Öµ: {effect.value}");
+        Debug.Log($"æ‰§è¡Œæ•ˆæœ: {effect.effectName}, å€¼: {effect.value}");
 
         switch (effect.effectName)
         {
-            case "Ôì³ÉÉËº¦":
+            case "é€ æˆä¼¤å®³":
                 yield return ExecuteDamageEffect(effect, caster, target, battleData);
                 break;
 
-            case "ÖÎÁÆ":
+            case "æ²»ç–—":
                 yield return ExecuteHealEffect(effect, caster, target, battleData);
                 break;
 
-            case "Ìí¼Ó»¤¶Ü":
+            case "æ·»åŠ æŠ¤ç›¾":
                 yield return ExecuteShieldEffect(effect, caster, target);
                 break;
 
-            case "Ìí¼Ó¸¯ÀÃ":
+            case "é™„åŠ è…çƒ‚":
                 yield return ExecuteAddStatusEffect(effect, caster, target, StatusType.Rot);
                 break;
 
-            case "Ìí¼ÓË¥Èõ":
+            case "æ–½åŠ è¡°å¼±":
                 yield return ExecuteAddStatusEffect(effect, caster, target, StatusType.Weak);
                 break;
 
-            case "Ìí¼ÓÇ¿×³":
+            case "æ–½åŠ æ˜“ä¼¤":
                 yield return ExecuteAddStatusEffect(effect, caster, target, StatusType.Strong);
                 break;
 
-            case "³éÅÆ":
+            case "æŠ½ç‰Œ":
                 yield return ExecuteDrawCardEffect(effect, caster);
                 break;
 
-            case "´¥·¢¸¯ÀÃ":
+            case "å¼•çˆ†è…çƒ‚":
                 yield return ExecuteTriggerRotEffect(effect, target, battleData);
                 break;
 
-            case "Ëæ»úÉËº¦":
+            case "éšæœºä¼¤å®³":
                 yield return ExecuteRandomDamageEffect(effect, caster, battleData);
                 break;
 
             default:
-                Debug.LogWarning($"Î´ÖªĞ§¹ûÀàĞÍ: {effect.effectName}");
+                Debug.LogWarning($"æœªçŸ¥æ•ˆæœç±»å‹: {effect.effectName}");
                 break;
         }
     }
 
-    // Ö´ĞĞÉËº¦Ğ§¹û
+    // æ‰§è¡Œä¼¤å®³æ•ˆæœ
     IEnumerator ExecuteDamageEffect(CardEffect effect, CharacterData caster, CharacterData target, BattleData battleData)
     {
         if (target == null || target.isDead) yield break;
 
-        // ¼ÆËãÉËº¦£¨¿¼ÂÇÇ¿×³/Ë¥Èõ×´Ì¬£©
+        // è®¡ç®—ä¼¤å®³ï¼Œè€ƒè™‘æ˜“ä¼¤/è¡°å¼±çŠ¶æ€
         int damage = effect.value;
-        damage += caster.GetDamageModifier(); // Ê©·¨ÕßµÄÇ¿×³¼Ó³É
-        damage -= target.GetDamageModifier(); // Ä¿±êµÄË¥Èõ¼õÉË
+        damage += caster.GetDamageModifier(); // æ–½æ³•è€…çš„æ˜“ä¼¤åŠ æˆ
+        damage -= target.GetDamageModifier(); // ç›®æ ‡çš„è¡°å¼±å‡å…
 
-        // È·±£ÉËº¦²»Îª¸º
+        // ç¡®ä¿ä¼¤å®³ä¸ä¸ºè´Ÿ
         damage = Mathf.Max(1, damage);
 
-        Debug.Log($"{caster.characterName} ¶Ô {target.characterName} Ôì³É {damage} µãÉËº¦");
+        Debug.Log($"{caster.characterName} å¯¹ {target.characterName} é€ æˆ {damage} ç‚¹ä¼¤å®³");
 
-        // ÏÔÊ¾ÉËº¦Ğ§¹û
+        // æ˜¾ç¤ºä¼¤å®³ç‰¹æ•ˆ
         if (damageEffectPrefab != null && target.characterClass != CharacterClass.Universal)
         {
             ShowEffectAtCharacter(damageEffectPrefab, target, $"{damage}");
         }
 
-        // Ó¦ÓÃÉËº¦
+        // åº”ç”¨ä¼¤å®³
         target.TakeDamage(damage);
 
         yield return new WaitForSeconds(0.5f);
     }
 
-    // Ö´ĞĞÖÎÁÆĞ§¹û
+    // æ‰§è¡Œæ²»ç–—æ•ˆæœ
     IEnumerator ExecuteHealEffect(CardEffect effect, CharacterData caster, CharacterData target, BattleData battleData)
     {
         if (target == null || target.isDead) yield break;
 
         int healAmount = effect.value;
 
-        // ¼ì²éÊÇ·ñÓĞ"ÏÂ´ÎÖÎÁÆË«±¶"µÄĞ§¹û
-        if (caster.HasTemporaryEffect("ÏÂ´ÎÖÎÁÆË«±¶"))
+        // æ£€æŸ¥æ˜¯å¦æœ‰"ä¸‹æ¬¡æ²»ç–—åŒå€"æ•ˆæœ
+        if (caster.HasTemporaryEffect("ä¸‹æ¬¡æ²»ç–—åŒå€"))
         {
             healAmount *= 2;
-            caster.RemoveTemporaryEffect("ÏÂ´ÎÖÎÁÆË«±¶");
-            Debug.Log("´¥·¢ÖÎÁÆË«±¶Ğ§¹û");
+            caster.RemoveTemporaryEffect("ä¸‹æ¬¡æ²»ç–—åŒå€");
+            Debug.Log("è§¦å‘æ²»ç–—åŒå€æ•ˆæœ");
         }
 
-        Debug.Log($"{caster.characterName} ÖÎÁÆ {target.characterName} {healAmount} µãÉúÃü");
+        Debug.Log($"{caster.characterName} æ²»ç–— {target.characterName} {healAmount} ç‚¹ç”Ÿå‘½");
 
-        // ÏÔÊ¾ÖÎÁÆĞ§¹û
+        // æ˜¾ç¤ºæ²»ç–—ç‰¹æ•ˆ
         if (healEffectPrefab != null)
         {
             ShowEffectAtCharacter(healEffectPrefab, target, $"+{healAmount}");
         }
 
-        // Ó¦ÓÃÖÎÁÆ
+        // åº”ç”¨æ²»ç–—
         target.Heal(healAmount);
 
         yield return new WaitForSeconds(0.5f);
     }
 
-    // Ö´ĞĞ»¤¶ÜĞ§¹û
+    // æ‰§è¡ŒæŠ¤ç›¾æ•ˆæœ
     IEnumerator ExecuteShieldEffect(CardEffect effect, CharacterData caster, CharacterData target)
     {
         if (target == null || target.isDead) yield break;
 
         int shieldAmount = effect.value;
 
-        Debug.Log($"{caster.characterName} Îª {target.characterName} Ìí¼Ó {shieldAmount} µã»¤¶Ü");
+        Debug.Log($"{caster.characterName} ä¸º {target.characterName} æ·»åŠ  {shieldAmount} ç‚¹æŠ¤ç›¾");
 
-        // ÏÔÊ¾»¤¶ÜĞ§¹û
+        // æ˜¾ç¤ºæŠ¤ç›¾ç‰¹æ•ˆ
         if (shieldEffectPrefab != null)
         {
-            ShowEffectAtCharacter(shieldEffectPrefab, target, $"+{shieldAmount}»¤¶Ü");
+            ShowEffectAtCharacter(shieldEffectPrefab, target, $"+{shieldAmount}æŠ¤ç›¾");
         }
 
-        // Ìí¼Ó»¤¶Ü
+        // æ·»åŠ æŠ¤ç›¾
         target.AddShield(shieldAmount);
 
         yield return new WaitForSeconds(0.3f);
     }
 
-    // Ö´ĞĞÌí¼Ó×´Ì¬Ğ§¹û
+    // æ‰§è¡Œæ·»åŠ çŠ¶æ€æ•ˆæœ
     IEnumerator ExecuteAddStatusEffect(CardEffect effect, CharacterData caster, CharacterData target, StatusType statusType)
     {
         if (target == null || target.isDead) yield break;
 
         int stacks = effect.statusStacks;
 
-        Debug.Log($"{caster.characterName} ¶Ô {target.characterName} Ìí¼Ó {stacks} ²ã{GetStatusName(statusType)}");
+        Debug.Log($"{caster.characterName} å¯¹ {target.characterName} æ–½åŠ  {stacks} å±‚{GetStatusName(statusType)}");
 
-        // ÏÔÊ¾×´Ì¬Ğ§¹û
+        // æ˜¾ç¤ºçŠ¶æ€ç‰¹æ•ˆ
         if (statusEffectPrefab != null)
         {
             ShowEffectAtCharacter(statusEffectPrefab, target, $"+{stacks}{GetStatusSymbol(statusType)}");
         }
 
-        // Ìí¼Ó×´Ì¬
+        // æ·»åŠ çŠ¶æ€
         target.AddStatus(statusType, stacks);
 
         yield return new WaitForSeconds(0.3f);
     }
 
-    // Ö´ĞĞ³éÅÆĞ§¹û
+    // æ‰§è¡ŒæŠ½ç‰Œæ•ˆæœ
     IEnumerator ExecuteDrawCardEffect(CardEffect effect, CharacterData caster)
     {
         int drawCount = effect.value;
 
-        Debug.Log($"{caster.characterName} ³é {drawCount} ÕÅÅÆ");
+        Debug.Log($"{caster.characterName} æŠ½ {drawCount} å¼ ç‰Œ");
 
-        // ÕâÀï¿ÉÒÔ´¥·¢³éÅÆ¶¯»­
-        // ÔİÊ±Ö»¼ÇÂ¼ÈÕÖ¾
+        // éœ€è¦ä»ç‰Œåº“æŠ½ç‰Œçš„é€»è¾‘
+        // æš‚æ—¶åªè®°å½•æ—¥å¿—
 
         yield return new WaitForSeconds(0.2f);
     }
 
-    // Ö´ĞĞ´¥·¢¸¯ÀÃĞ§¹û
+    // æ‰§è¡Œå¼•çˆ†è…çƒ‚æ•ˆæœ
     IEnumerator ExecuteTriggerRotEffect(CardEffect effect, CharacterData target, BattleData battleData)
     {
         if (target == null || target.isDead) yield break;
 
-        Debug.Log($"´¥·¢ {target.characterName} µÄ¸¯ÀÃĞ§¹û");
+        Debug.Log($"å¼•çˆ† {target.characterName} çš„è…çƒ‚æ•ˆæœ");
 
-        // ´¥·¢¸¯ÀÃ×´Ì¬
+        // è§¦å‘è…çƒ‚çŠ¶æ€
         target.TriggerStatusEffect(StatusType.Rot);
 
         yield return new WaitForSeconds(0.5f);
     }
 
-    // Ö´ĞĞËæ»úÉËº¦Ğ§¹û
+    // æ‰§è¡Œéšæœºä¼¤å®³æ•ˆæœ
     IEnumerator ExecuteRandomDamageEffect(CardEffect effect, CharacterData caster, BattleData battleData)
     {
-        // »ñÈ¡ËùÓĞµĞ·½½ÇÉ«
+        // è·å–æ‰€æœ‰å­˜æ´»çš„æ•Œäºº
         List<CharacterData> enemies = new List<CharacterData>(battleData.enemyTeam);
         enemies.RemoveAll(e => e.isDead);
 
         if (enemies.Count == 0) yield break;
 
-        Debug.Log($"{caster.characterName} ·¢¶¯Ëæ»úÉËº¦");
+        Debug.Log($"{caster.characterName} æ–½æ”¾éšæœºä¼¤å®³");
 
-        // Ëæ»úÑ¡ÔñÄ¿±ê3´Î
+        // éšæœºé€‰æ‹©ç›®æ ‡3æ¬¡
         for (int i = 0; i < 3; i++)
         {
             if (enemies.Count == 0) break;
@@ -230,10 +230,10 @@ public class CardEffectExecutor : MonoBehaviour
             int randomIndex = Random.Range(0, enemies.Count);
             CharacterData randomTarget = enemies[randomIndex];
 
-            // Ö´ĞĞÉËº¦
+            // æ‰§è¡Œä¼¤å®³
             CardEffect damageEffect = new CardEffect
             {
-                effectName = "Ôì³ÉÉËº¦",
+                effectName = "é€ æˆä¼¤å®³",
                 value = effect.value
             };
 
@@ -241,7 +241,7 @@ public class CardEffectExecutor : MonoBehaviour
         }
     }
 
-    // ÔÚ½ÇÉ«Î»ÖÃÏÔÊ¾ÌØĞ§
+    // åœ¨è§’è‰²ä½ç½®æ˜¾ç¤ºç‰¹æ•ˆ
     void ShowEffectAtCharacter(GameObject effectPrefab, CharacterData character, string text = "")
     {
         CharacterBattleUI characterUI = FindCharacterUI(character);
@@ -250,14 +250,14 @@ public class CardEffectExecutor : MonoBehaviour
             GameObject effect = Instantiate(effectPrefab, characterUI.transform);
             effect.transform.localPosition = Vector3.zero;
 
-            // Èç¹ûÓĞÎÄ±¾£¬ÏÔÊ¾ÎÄ±¾
+            // å¦‚æœæœ‰æ–‡æœ¬ç»„ä»¶ï¼Œåˆ™æ˜¾ç¤ºæ–‡æœ¬
             Text effectText = effect.GetComponentInChildren<Text>();
             if (effectText != null && !string.IsNullOrEmpty(text))
             {
                 effectText.text = text;
             }
 
-            // ×Ô¶¯Ïú»Ù
+            // è‡ªåŠ¨é”€æ¯
             Destroy(effect, 2f);
         }
     }
@@ -267,7 +267,7 @@ public class CardEffectExecutor : MonoBehaviour
         CharacterBattleUI[] allUIs = FindObjectsOfType<CharacterBattleUI>();
         foreach (var ui in allUIs)
         {
-            if (ui.CharacterData == character)
+            if (ui.characterData == character)
             {
                 return ui;
             }
@@ -279,11 +279,11 @@ public class CardEffectExecutor : MonoBehaviour
     {
         switch (status)
         {
-            case StatusType.Rot: return "¸¯ÀÃ";
-            case StatusType.Strong: return "Ç¿×³";
-            case StatusType.Weak: return "Ë¥Èõ";
-            case StatusType.Shield: return "»¤¶Ü";
-            default: return "×´Ì¬";
+            case StatusType.Rot: return "è…çƒ‚";
+            case StatusType.Strong: return "æ˜“ä¼¤";
+            case StatusType.Weak: return "è¡°å¼±";
+            case StatusType.Shield: return "æŠ¤ç›¾";
+            default: return "çŠ¶æ€";
         }
     }
 
@@ -291,11 +291,11 @@ public class CardEffectExecutor : MonoBehaviour
     {
         switch (status)
         {
-            case StatusType.Rot: return "¸¯";
-            case StatusType.Strong: return "Ç¿";
-            case StatusType.Weak: return "Èõ";
-            case StatusType.Shield: return "¶Ü";
-            default: return "×´";
+            case StatusType.Rot: return "è…";
+            case StatusType.Strong: return "æ˜“";
+            case StatusType.Weak: return "è¡°";
+            case StatusType.Shield: return "ç›¾";
+            default: return "çŠ¶";
         }
     }
 }
